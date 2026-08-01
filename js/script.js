@@ -5,7 +5,6 @@ burger?.addEventListener('click', () => {
     burger.classList.toggle('active');
     nav.classList.toggle('active');
 });
-// Close menu on link click
 document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', () => {
         burger?.classList.remove('active');
@@ -25,15 +24,41 @@ document.querySelectorAll('.service-card, .portfolio-card, .price-card, .stat').
     observer.observe(el);
 });
 
-// Contact form
+// Contact form — sends email via Formspree
 const form = document.getElementById('contactForm');
 const note = document.getElementById('formNote');
-form?.addEventListener('submit', (e) => {
+const submitBtn = form?.querySelector('button[type="submit"]');
+
+form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    note.textContent = '✅ Дякуємо! Ми зв\'яжемось з вами найближчим часом.';
-    note.style.color = '#2ecc71';
-    form.reset();
-    setTimeout(() => note.textContent = '', 5000);
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '⏳ Відправка...';
+    submitBtn.disabled = true;
+    note.textContent = '';
+
+    try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+            note.textContent = '✅ Дякуємо! Лист відправлено, ми зв\'яжемось з вами.';
+            note.style.color = '#2ecc71';
+            form.reset();
+        } else {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.errors?.[0]?.message || 'Помилка відправки');
+        }
+    } catch (err) {
+        note.textContent = '❌ Не вдалося відправити. Спробуйте ще раз або напишіть на email.';
+        note.style.color = '#e74c3c';
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
 });
 
 // Smooth scroll offset for sticky header
