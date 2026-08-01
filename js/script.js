@@ -24,7 +24,7 @@ document.querySelectorAll('.service-card, .portfolio-card, .price-card, .stat').
     observer.observe(el);
 });
 
-// Contact form — sends email via Formspree
+// Contact form — sends email via Formsubmit.co
 const form = document.getElementById('contactForm');
 const note = document.getElementById('formNote');
 const submitBtn = form?.querySelector('button[type="submit"]');
@@ -38,22 +38,24 @@ form?.addEventListener('submit', async (e) => {
 
     try {
         const formData = new FormData(form);
+        formData.append('_subject', 'GreenPixel Studio — нова заявка з сайту');
+        formData.append('_template', 'table');
+        formData.append('_captcha', 'false');
+
         const response = await fetch(form.action, {
             method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
+            body: formData
         });
 
         if (response.ok) {
-            note.textContent = '✅ Дякуємо! Лист відправлено, ми зв\'яжемось з вами.';
+            note.textContent = '✅ Дякуємо! Заявку відправлено, ми зв\'яжемось з вами.';
             note.style.color = '#2ecc71';
             form.reset();
         } else {
-            const data = await response.json().catch(() => ({}));
-            throw new Error(data.errors?.[0]?.message || 'Помилка відправки');
+            throw new Error('Помилка відправки');
         }
     } catch (err) {
-        note.textContent = '❌ Не вдалося відправити. Спробуйте ще раз або напишіть на email.';
+        note.textContent = '❌ Не вдалося відправити. Напишіть нам на email.';
         note.style.color = '#e74c3c';
     } finally {
         submitBtn.textContent = originalText;
