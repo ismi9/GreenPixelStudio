@@ -89,12 +89,74 @@
             <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#2ecc71;--g2:#f1c40f;"><span>🛒</span></div><h3>Online Store</h3><p>Інтернет-магазин із каталогом товарів та оплатою.</p></article>
             <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#27ae60;--g2:#2c3e50;"><span>⚖️</span></div><h3>Law Company</h3><p>Сайт юридичної компанії з формою консультації.</p></article>
             <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#f1c40f;--g2:#2ecc71;"><span>🏠</span></div><h3>Real Estate</h3><p>Платформа для продажу та оренди нерухомості.</p></article>
-            <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#2ecc71;--g2:#e67e22;"><span>✈️</span></div><h3>Travel Agency</h3><p>Туристичний сайт із каталогом турів.</p></article>
+            <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#2ecc71;--g2:#27ae60;"><span>📦</span></div><h3>LifeStock</h3><p>Управління запасами: 📷 сканування штрихкоду, ➕ додавання товару, 📦 список запасів, ⏳ контроль терміну придатності, 🛒 список покупок.</p></article>
         </div>
     </div>
 </section>
 
 <!-- ===== WHY US ===== -->
+<!-- ===== LifeStock Portfolio Detail ===== -->
+<section class="lifestock-detail" style="padding:60px 0;background:#f8fef9;border-bottom:1px solid #e0f5e5;">
+    <div class="container">
+        <h2 class="section-title" style="text-align:center;margin-bottom:10px;">LifeStock</h2>
+        <p style="text-align:center;color:#666;margin-bottom:40px;">Monorepo-архітектура для управління запасами та термінами придатності</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px;max-width:900px;margin:0 auto 40px;">
+            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+                <div style="font-size:36px;margin-bottom:8px;">📷</div>
+                <h4 style="font-size:1rem;margin-bottom:4px;">Сканування штрихкоду</h4>
+                <p style="font-size:0.85rem;color:#888;">Камера → товар за 1 секунду</p>
+            </div>
+            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+                <div style="font-size:36px;margin-bottom:8px;">➕</div>
+                <h4 style="font-size:1rem;margin-bottom:4px;">Додавання товару</h4>
+                <p style="font-size:0.85rem;color:#888;">Вручну або через сканер</p>
+            </div>
+            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+                <div style="font-size:36px;margin-bottom:8px;">📦</div>
+                <h4 style="font-size:1rem;margin-bottom:4px;">Список запасів</h4>
+                <p style="font-size:0.85rem;color:#888;">Категорії, пошук, фільтри</p>
+            </div>
+            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+                <div style="font-size:36px;margin-bottom:8px;">⏳</div>
+                <h4 style="font-size:1rem;margin-bottom:4px;">Термін придатності</h4>
+                <p style="font-size:0.85rem;color:#888;">Сповіщення до закінчення</p>
+            </div>
+            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+                <div style="font-size:36px;margin-bottom:8px;">🛒</div>
+                <h4 style="font-size:1rem;margin-bottom:4px;">Список покупок</h4>
+                <p style="font-size:0.85rem;color:#888;">Автогенерація з залишків</p>
+            </div>
+        </div>
+        <div style="max-width:700px;margin:0 auto;">
+            <h3 style="text-align:center;font-size:1.1rem;margin-bottom:16px;color:#333;">Структура проєкту</h3>
+            <pre style="background:#1a2e1a;color:#2ecc71;padding:24px;border-radius:12px;font-size:0.82rem;overflow-x:auto;line-height:1.6;">LifeStock/
+├── apps/
+│   ├── mobile/      ← React Native / Expo
+│   ├── web/         ← Next.js + TypeScript
+│   └── admin/       ← React Admin Dashboard
+├── backend/
+│   ├── api/         ← REST API (Node.js / Express)
+│   ├── ai/          ← ML для прогнозування залишків
+│   └── sync/        ← Синхронізація між пристроями
+├── packages/
+│   ├── ui/          ← Спільні UI-компоненти
+│   ├── core/        ← Бізнес-логіка
+│   ├── scanner/     ← Модуль сканування штрихкоду
+│   ├── database/   ← ORM, міграції, схеми
+│   └── shared/      ← Типи, утиліти, константи
+├── docs/            ← Документація
+├── database/        ← SQL міграції
+├── scripts/         ← CI/CD скрипти
+├── tests/           ← E2E + unit тести
+├── .github/
+│   └── workflows/   ← CI/CD пайплайни
+├── README.md
+├── LICENSE
+└── CONTRIBUTING.md</pre>
+        </div>
+    </div>
+</section>
+<!-- ===== End LifeStock ===== -->
 <section class="why-us">
     <div class="container">
         <div class="section-head">
