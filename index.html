@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPixel Studio</title>
-    <meta name="description" content="GreenPixel Studio — сучасна вебстудія зі створення сайтів.">
+    <title>LifeStock — Платформа управління запасами 1.0</title>
+    <meta name="description" content="LifeStock — відкрита платформа для управління запасами, термінами придатності та покупками. Стабільне ядро, розширювані модулі, AI-асистент.">
     <link rel="icon" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,12 +17,15 @@
 <header class="header" id="top">
     <div class="container header-inner">
         <a href="#top" class="logo">
-            <span class="logo-mark">●</span> GreenPixel <span class="logo-accent">Studio</span>
+            <span class="logo-mark">📦</span> Life<span class="logo-accent">Stock</span>
         </a>
         <nav class="nav" id="nav">
-            <a href="#services" class="nav-link">Послуги</a>
-            <a href="#portfolio" class="nav-link">Портфоліо</a>
-            <a href="#pricing" class="nav-link">Ціни</a>
+            <a href="#core" class="nav-link">Ядро</a>
+            <a href="#extensions" class="nav-link">Розширення</a>
+            <a href="#modules" class="nav-link">Модулі</a>
+            <a href="#ai" class="nav-link">AI</a>
+            <a href="#automation" class="nav-link">Автоматизації</a>
+            <a href="#roadmap" class="nav-link">Roadmap</a>
             <a href="#contact" class="nav-link">Контакти</a>
         </nav>
         <a href="#contact" class="btn btn-primary btn-sm">Замовити</a>
@@ -36,12 +39,12 @@
 <section class="hero">
     <div class="container hero-inner">
         <div class="hero-text">
-            <span class="badge">🚀 Вебстудія нового покоління</span>
-            <h1>Створюємо <span class="accent">сайти</span>, які приносять <span class="accent">клієнтів</span></h1>
-            <p>Від лендингів до складних вебдодатків — проєктуємо, розробляємо та підтримуємо сайти, що працюють на ваш бізнес.</p>
+            <span class="badge">🚀 Platform Specification 1.0</span>
+            <h1>Платформа <span class="accent">LifeStock</span> — стандарт для управління запасами</h1>
+            <p>Відкрита розширювана платформа: сканування штрихкодів, контроль термінів придатності, списки покупок, автоматизації. Ядро працює без інтернету та без AI.</p>
             <div class="hero-actions">
-                <a href="#contact" class="btn btn-primary">Обговорити проєкт</a>
-                <a href="#portfolio" class="btn btn-ghost">Подивитись роботи</a>
+                <a href="#core" class="btn btn-primary">Переглянути специфікацію</a>
+                <a href="#modules" class="btn btn-ghost">Каталог модулів</a>
             </div>
         </div>
         <div class="hero-visual">
@@ -58,165 +61,297 @@
     </div>
 </section>
 
-<!-- ===== SERVICES ===== -->
-<section id="services" class="services">
+<!-- ===== PRINCIPLE BANNER ===== -->
+<section class="principle-banner">
     <div class="container">
-        <div class="section-head">
-            <span class="section-tag">Що ми робимо</span>
-            <h2>Наші послуги</h2>
-        </div>
-        <div class="services-grid">
-            <article class="service-card"><div class="service-icon">📄</div><h3>Landing Page</h3><p>Односторінкові сайти для продажів, реклами та презентації продуктів.</p></article>
-            <article class="service-card"><div class="service-icon">🏢</div><h3>Корпоративні сайти</h3><p>Сучасні сайти для компаній із професійним дизайном та SEO.</p></article>
-            <article class="service-card"><div class="service-icon">🛒</div><h3>Інтернет-магазини</h3><p>Швидкі та зручні магазини з адаптивним дизайном.</p></article>
-            <article class="service-card"><div class="service-icon">⚙️</div><h3>Вебдодатки</h3><p>Індивідуальні рішення для автоматизації бізнесу.</p></article>
-            <article class="service-card"><div class="service-icon">🔍</div><h3>SEO-оптимізація</h3><p>Підготовка сайту для ефективного просування в пошукових системах.</p></article>
-            <article class="service-card"><div class="service-icon">🛡️</div><h3>Підтримка</h3><p>Оновлення, резервні копії, технічний супровід та розвиток проєкту.</p></article>
+        <div class="principle-box">
+            <span class="principle-icon">🛡️</span>
+            <div>
+                <h3>Ядро не залежить від ШІ</h3>
+                <p>Усі критичні функції — облік, терміни придатності, рух товарів, звіти — працюють без підключення до моделей штучного інтелекту. ШІ — помічник, а не обов'язкова частина системи. Немає інтернету? Платформа продовжує працювати.</p>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- ===== PORTFOLIO ===== -->
-<section id="portfolio" class="portfolio">
+<!-- ===== STABLE CORE ===== -->
+<section id="core" class="core-section">
     <div class="container">
         <div class="section-head">
-            <span class="section-tag">Наші роботи</span>
-            <h2>Портфоліо</h2>
+            <span class="section-tag">Стабільне ядро</span>
+            <h2>10 модулів версії 1.0</h2>
+            <p class="section-sub">Після виходу 1.0 інтерфейси цих модулів не змінюються без вагомої причини.</p>
         </div>
-        <div class="portfolio-grid">
-            <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#2ecc71;--g2:#27ae60;"><span>🍽️</span></div><h3>Restaurant Website</h3><p>Сучасний сайт ресторану з онлайн-бронюванням.</p></article>
-            <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#f1c40f;--g2:#e67e22;"><span>🏥</span></div><h3>Medical Clinic</h3><p>Корпоративний сайт приватної клініки.</p></article>
-            <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#2ecc71;--g2:#f1c40f;"><span>🛒</span></div><h3>Online Store</h3><p>Інтернет-магазин із каталогом товарів та оплатою.</p></article>
-            <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#27ae60;--g2:#2c3e50;"><span>⚖️</span></div><h3>Law Company</h3><p>Сайт юридичної компанії з формою консультації.</p></article>
-            <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#f1c40f;--g2:#2ecc71;"><span>🏠</span></div><h3>Real Estate</h3><p>Платформа для продажу та оренди нерухомості.</p></article>
-            <article class="portfolio-card"><div class="portfolio-thumb" style="--g1:#2ecc71;--g2:#27ae60;"><span>📦</span></div><h3>LifeStock</h3><p>Управління запасами: 📷 сканування штрихкоду, ➕ додавання товару, 📦 список запасів, ⏳ контроль терміну придатності, 🛒 список покупок.</p></article>
+        <div class="core-grid">
+            <div class="core-card"><span class="core-icon">🏭</span><h4>Product Core</h4><p>Базові сутності: товари, категорії, одиниці виміру.</p></div>
+            <div class="core-card"><span class="core-icon">📊</span><h4>Batch Manager</h4><p>Партії товарів, відстеження надходжень і списань.</p></div>
+            <div class="core-card"><span class="core-icon">📦</span><h4>Inventory Engine</h4><p>Облік залишків, розрахунок доступних кількостей.</p></div>
+            <div class="core-card"><span class="core-icon">🏬</span><h4>Storage Manager</h4><p>Місця зберігання, полиці, холодильники, склади.</p></div>
+            <div class="core-card"><span class="core-icon">📷</span><h4>Barcode Registry</h4><p>Реєстр штрихкодів, прив'язка до товарів.</p></div>
+            <div class="core-card"><span class="core-icon">📸</span><h4>Camera AI</h4><p>Сканування та розпізнавання через камеру.</p></div>
+            <div class="core-card"><span class="core-icon">🧾</span><h4>Recipe Engine</h4><p>Рецепти, розрахунок інгредієнтів, порції.</p></div>
+            <div class="core-card"><span class="core-icon">🔔</span><h4>Notification Center</h4><p>Сповіщення: терміни, залишки, події.</p></div>
+            <div class="core-card"><span class="core-icon">🔐</span><h4>Security</h4><p>Користувачі, права доступу, ролі, аудит.</p></div>
+            <div class="core-card"><span class="core-icon">🔄</span><h4>Synchronization</h4><p>Синхронізація між пристроями, офлайн-режим.</p></div>
         </div>
     </div>
 </section>
 
-<!-- ===== WHY US ===== -->
-<!-- ===== LifeStock Portfolio Detail ===== -->
-<section class="lifestock-detail" style="padding:60px 0;background:#f8fef9;border-bottom:1px solid #e0f5e5;">
+<!-- ===== EXTENSION MODEL ===== -->
+<section id="extensions" class="extensions-section">
     <div class="container">
-        <h2 class="section-title" style="text-align:center;margin-bottom:10px;">LifeStock</h2>
-        <p style="text-align:center;color:#666;margin-bottom:40px;">Monorepo-архітектура для управління запасами та термінами придатності</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px;max-width:900px;margin:0 auto 40px;">
-            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-                <div style="font-size:36px;margin-bottom:8px;">📷</div>
-                <h4 style="font-size:1rem;margin-bottom:4px;">Сканування штрихкоду</h4>
-                <p style="font-size:0.85rem;color:#888;">Камера → товар за 1 секунду</p>
+        <div class="section-head">
+            <span class="section-tag">Модель розширень</span>
+            <h2>Підключай нові модулі через стандартний інтерфейс</h2>
+            <p class="section-sub">Кожен новий модуль використовує однакові механізми: користувачі, права, фото, документи, події, синхронізація.</p>
+        </div>
+        <div class="extensions-grid">
+            <div class="ext-card"><span class="ext-icon">🍇</span><h4>Виноградник</h4><p>Облік лоз, дозрівання, збирання врожаю.</p></div>
+            <div class="ext-card"><span class="ext-icon">🚜</span><h4>Ферма</h4><p>Управління посівами, кормами, поголів'ям.</p></div>
+            <div class="ext-card"><span class="ext-icon">🍷</span><h4>Виноробство</h4><p>Партії вин, контроль бродіння, витрати.</p></div>
+            <div class="ext-card"><span class="ext-icon">💊</span><h4>Аптека</h4><p>Лікарські засоби, терміни, партії.</p></div>
+            <div class="ext-card"><span class="ext-icon">💄</span><h4>Косметика</h4><p>Продукція, серії, терміни придатності.</p></div>
+            <div class="ext-card"><span class="ext-icon">🐾</span><h4>Зоотовари</h4><p>Корми, аксесуари, ветеринарні препарати.</p></div>
+            <div class="ext-card"><span class="ext-icon">🧱</span><h4>Будівельні матеріали</h4><p>Складські залишки, партії, замовлення.</p></div>
+            <div class="ext-card ext-card-add"><span class="ext-icon">➕</span><h4>Твій модуль</h4><p>Створи власне розширення через стандартний API.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== MODULE CATALOG ===== -->
+<section id="modules" class="modules-section">
+    <div class="container">
+        <div class="section-head">
+            <span class="section-tag">Каталог модулів</span>
+            <h2>Доступні модулі платформи</h2>
+        </div>
+        <div class="module-table-wrap">
+            <table class="module-table">
+                <thead>
+                    <tr><th>Модуль</th><th>Статус</th><th>Опис</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>📦 Домашні запаси</td><td><span class="badge-ok">✔ Готово</span></td><td>Базовий облік продуктів на кухні, в холодильнику та шафі.</td></tr>
+                    <tr><td>🧾 Рецепти</td><td><span class="badge-ok">✔ Готово</span></td><td>Рецепти з розрахунком інгредієнтів та порцій.</td></tr>
+                    <tr><td>🛒 Магазин</td><td><span class="badge-ok">✔ Готово</span></td><td>Списки покупок, автогенерація з залишків.</td></tr>
+                    <tr><td>🍽️ Ресторан</td><td><span class="badge-ok">✔ Готово</span></td><td>Облік запасів кухні, витрати страв, терміни.</td></tr>
+                    <tr><td>🏬 Склад</td><td><span class="badge-ok">✔ Готово</span></td><td>Багаторівневий склад, партії, інвентаризація.</td></tr>
+                    <tr><td>🍇 Виноградник</td><td><span class="badge-plan">⏳ Планується</span></td><td>Облік лоз, фази дозрівання, графіки збору.</td></tr>
+                    <tr><td>🍷 Виноробство</td><td><span class="badge-plan">⏳ Планується</span></td><td>Партії вин, контроль бродіння, складські витрати.</td></tr>
+                    <tr><td>🚜 Ферма</td><td><span class="badge-plan">⏳ Планується</span></td><td>Посіви, корми, поголів'я, витрата ресурсів.</td></tr>
+                    <tr><td>💊 Аптека</td><td><span class="badge-plan">⏳ Планується</span></td><td>Лікарські засоби, серійні номери, терміни.</td></tr>
+                    <tr><td>💄 Косметика</td><td><span class="badge-plan">⏳ Планується</span></td><td>Продукція, серії виробництва, придатність.</td></tr>
+                    <tr><td>🐾 Зоотовари</td><td><span class="badge-plan">⏳ Планується</span></td><td>Корми, добавки, ветеринарні препарати.</td></tr>
+                    <tr><td>🧱 Будівельні матеріали</td><td><span class="badge-plan">⏳ Планується</span></td><td>Складські залишки, партії, замовлення.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ===== API VERSIONING ===== -->
+<section id="api" class="api-section">
+    <div class="container">
+        <div class="section-head">
+            <span class="section-tag">API версіонування</span>
+            <h2>Сумісність при оновленнях</h2>
+            <p class="section-sub">Кожен API має власну версію — оновлення платформи без порушення сумісності.</p>
+        </div>
+        <div class="api-grid">
+            <div class="api-card">
+                <span class="api-version">v1</span>
+                <h4>API v1 — Стабільний</h4>
+                <p>Базові CRUD-операції: товари, партії, запаси, списки покупок. Стабільний контракт, гарантована зворотна сумісність.</p>
+                <ul>
+                    <li><code>GET /api/v1/products</code></li>
+                    <li><code>POST /api/v1/batches</code></li>
+                    <li><code>GET /api/v1/inventory</code></li>
+                    <li><code>POST /api/v1/shopping-list</code></li>
+                </ul>
             </div>
-            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-                <div style="font-size:36px;margin-bottom:8px;">➕</div>
-                <h4 style="font-size:1rem;margin-bottom:4px;">Додавання товару</h4>
-                <p style="font-size:0.85rem;color:#888;">Вручну або через сканер</p>
+            <div class="api-card">
+                <span class="api-version">v2</span>
+                <h4>API v2 — Розширений</h4>
+                <p>Партіонний облік, події, webhook, автоматизації. Розширена фільтрація, пагінація, real-time оновлення.</p>
+                <ul>
+                    <li><code>POST /api/v2/automations</code></li>
+                    <li><code>GET /api/v2/events/stream</code></li>
+                    <li><code>POST /api/v2/webhooks</code></li>
+                    <li><code>GET /api/v2/reports/custom</code></li>
+                </ul>
             </div>
-            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-                <div style="font-size:36px;margin-bottom:8px;">📦</div>
-                <h4 style="font-size:1rem;margin-bottom:4px;">Список запасів</h4>
-                <p style="font-size:0.85rem;color:#888;">Категорії, пошук, фільтри</p>
-            </div>
-            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-                <div style="font-size:36px;margin-bottom:8px;">⏳</div>
-                <h4 style="font-size:1rem;margin-bottom:4px;">Термін придатності</h4>
-                <p style="font-size:0.85rem;color:#888;">Сповіщення до закінчення</p>
-            </div>
-            <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-                <div style="font-size:36px;margin-bottom:8px;">🛒</div>
-                <h4 style="font-size:1rem;margin-bottom:4px;">Список покупок</h4>
-                <p style="font-size:0.85rem;color:#888;">Автогенерація з залишків</p>
+            <div class="api-card api-card-future">
+                <span class="api-version">v3</span>
+                <h4>API v3 — Майбутнє</h4>
+                <p>Командні простори, інтеграції ERP/POS, GraphQL-ендпоінти, multi-tenant архітектура.</p>
+                <ul>
+                    <li><code>GraphQL /api/v3/graphql</code></li>
+                    <li><code>POST /api/v3/teams</code></li>
+                    <li><code>POST /api/v3/erp/sync</code></li>
+                    <li><code>GET /api/v3/analytics</code></li>
+                </ul>
             </div>
         </div>
-        <div style="max-width:700px;margin:0 auto;">
-            <h3 style="text-align:center;font-size:1.1rem;margin-bottom:16px;color:#333;">Структура проєкту</h3>
-            <pre style="background:#1a2e1a;color:#2ecc71;padding:24px;border-radius:12px;font-size:0.82rem;overflow-x:auto;line-height:1.6;">LifeStock/
+    </div>
+</section>
+
+<!-- ===== AI PLATFORM ===== -->
+<section id="ai" class="ai-section">
+    <div class="container">
+        <div class="section-head">
+            <span class="section-tag">AI-платформа</span>
+            <h2>ШІ — окремий сервіс за дозволом користувача</h2>
+            <p class="section-sub">AI працює лише за згодою. Без нього платформа функціонує повноцінно.</p>
+        </div>
+        <div class="ai-grid">
+            <div class="ai-card">
+                <span class="ai-icon">📸</span>
+                <h4>Аналіз фото</h4>
+                <p>Розпізнавання товарів за фотографією, підрахунок кількості на полиці.</p>
+            </div>
+            <div class="ai-card">
+                <span class="ai-icon">🔤</span>
+                <h4>OCR</h4>
+                <p>Зчитування тексту з етикеток: склад, терміни, ціни — без ручного вводу.</p>
+            </div>
+            <div class="ai-card">
+                <span class="ai-icon">🍳</span>
+                <h4>Підбір рецептів</h4>
+                <p>Рецепти на основі наявних залишків. "Що приготувати з того, що є?"</p>
+            </div>
+            <div class="ai-card">
+                <span class="ai-icon">📊</span>
+                <h4>Аналіз залишків</h4>
+                <p>Виявлення надлишків, дефіциту, оптимізація розміщення товарів.</p>
+            </div>
+            <div class="ai-card">
+                <span class="ai-icon">🔮</span>
+                <h4>Прогнозування закупівель</h4>
+                <p>Прогноз попиту на основі історії витрати, сезонності, подій.</p>
+            </div>
+            <div class="ai-card">
+                <span class="ai-icon">💬</span>
+                <h4>Запити до бази даних</h4>
+                <p>"Скільки кави залишилось?" — відповіді природною мовою на основі власної бази.</p>
+            </div>
+        </div>
+        <div class="ai-note">
+            <span>🔒</span>
+            <p>ШІ активується тільки за добровільною згодою користувача. Усі дані обробляються локально, коли це можливо. Вимкнення AI не впливає на роботу платформи.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== AUTOMATION BUILDER ===== -->
+<section id="automation" class="automation-section">
+    <div class="container">
+        <div class="section-head">
+            <span class="section-tag">Конструктор автоматизацій</span>
+            <h2>Правила без програмування</h2>
+            <p class="section-sub">Користувачі створюють правила за схемою "Якщо → Тоді" — без коду.</p>
+        </div>
+        <div class="automation-builder">
+            <div class="automation-row">
+                <div class="automation-block automation-if">
+                    <h4>Якщо</h4>
+                    <div class="automation-item"><span>📉</span> Залишок &lt; мінімального</div>
+                    <div class="automation-item"><span>⏳</span> Термін придатності ≤ 3 днів</div>
+                    <div class="automation-item"><span>🌡️</span> Температура в холодильнику вища за норму</div>
+                </div>
+                <div class="automation-arrow">→</div>
+                <div class="automation-block automation-then">
+                    <h4>Тоді</h4>
+                    <div class="automation-item"><span>🔔</span> Надіслати сповіщення</div>
+                    <div class="automation-item"><span>🛒</span> Додати товар до списку покупок</div>
+                    <div class="automation-item"><span>📋</span> Створити завдання</div>
+                    <div class="automation-item"><span>⏰</span> Позначити партію для першочергового використання</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ROADMAP ===== -->
+<section id="roadmap" class="roadmap-section">
+    <div class="container">
+        <div class="section-head">
+            <span class="section-tag">План розвитку</span>
+            <h2>Після стабільного релізу 1.0</h2>
+        </div>
+        <div class="roadmap-timeline">
+            <div class="roadmap-item roadmap-current">
+                <div class="roadmap-marker">✅</div>
+                <div class="roadmap-content">
+                    <span class="roadmap-version">Версія 1.0</span>
+                    <h4>Стабільне ядро</h4>
+                    <p>10 базових модулів: Product Core, Batch Manager, Inventory Engine, Storage Manager, Barcode Registry, Camera AI, Recipe Engine, Notification Center, Security, Synchronization.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-marker">📌</div>
+                <div class="roadmap-content">
+                    <span class="roadmap-version">Версія 1.1</span>
+                    <h4>Імпорт та звіти</h4>
+                    <p>Імпорт із таблиць (CSV/Excel), експорт даних, розширені звіти та дашборди.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-marker">📌</div>
+                <div class="roadmap-content">
+                    <span class="roadmap-version">Версія 1.2</span>
+                    <h4>Апаратна інтеграція</h4>
+                    <p>Підтримка Bluetooth-сканерів, друк етикеток, інвентаризація з фізичною перевіркою.</p>
+                </div>
+            </div>
+            <div class="roadmap-item roadmap-future">
+                <div class="roadmap-marker">🚀</div>
+                <div class="roadmap-content">
+                    <span class="roadmap-version">Версія 2.0</span>
+                    <h4>Команди та інтеграції</h4>
+                    <p>Багатокористувацька робота, командні простори, інтеграції з ERP/POS-системами, розширений AI.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ARCHITECTURE ===== -->
+<section class="arch-section">
+    <div class="container">
+        <div class="section-head">
+            <span class="section-tag">Архітектура</span>
+            <h2>Monorepo-структура платформи</h2>
+        </div>
+        <div class="arch-tree-wrap">
+            <pre class="arch-tree">LifeStock/
 ├── apps/
 │   ├── mobile/      ← React Native / Expo
 │   ├── web/         ← Next.js + TypeScript
 │   └── admin/       ← React Admin Dashboard
 ├── backend/
 │   ├── api/         ← REST API (Node.js / Express)
-│   ├── ai/          ← ML для прогнозування залишків
+│   ├── ai/          ← AI-сервіс (опціональний, окремий процес)
 │   └── sync/        ← Синхронізація між пристроями
 ├── packages/
 │   ├── ui/          ← Спільні UI-компоненти
-│   ├── core/        ← Бізнес-логіка
+│   ├── core/        ← Стабільне ядро 1.0
 │   ├── scanner/     ← Модуль сканування штрихкоду
-│   ├── database/   ← ORM, міграції, схеми
+│   ├── database/    ← ORM, міграції, схеми
 │   └── shared/      ← Типи, утиліти, константи
-├── docs/            ← Документація
-├── database/        ← SQL міграції
-├── scripts/         ← CI/CD скрипти
-├── tests/           ← E2E + unit тести
+├── extensions/       ← Каталог розширень платформи
+│   ├── vineyard/    ← Виноградник
+│   ├── farm/        ← Ферма
+│   ├── pharmacy/    ← Аптека
+│   └── ...          ← Нові модулі через стандартний інтерфейс
+├── docs/
+├── database/
+├── scripts/
+├── tests/
 ├── .github/
-│   └── workflows/   ← CI/CD пайплайни
+│   └── workflows/
 ├── README.md
 ├── LICENSE
 └── CONTRIBUTING.md</pre>
-        </div>
-    </div>
-</section>
-<!-- ===== End LifeStock ===== -->
-<section class="why-us">
-    <div class="container">
-        <div class="section-head">
-            <span class="section-tag">Переваги</span>
-            <h2>Чому обирають GreenPixel Studio</h2>
-        </div>
-        <div class="stats-row">
-            <div class="stat"><span class="stat-num">150+</span><span class="stat-label">Виконаних проєктів</span></div>
-            <div class="stat"><span class="stat-num">98%</span><span class="stat-label">Задоволених клієнтів</span></div>
-            <div class="stat"><span class="stat-num">5+</span><span class="stat-label">Років досвіду</span></div>
-            <div class="stat"><span class="stat-num">24/7</span><span class="stat-label">Підтримка</span></div>
-        </div>
-    </div>
-</section>
-
-<!-- ===== PRICING ===== -->
-<section id="pricing" class="pricing">
-    <div class="container">
-        <div class="section-head">
-            <span class="section-tag">Тарифи</span>
-            <h2>Ціни</h2>
-        </div>
-        <div class="pricing-grid">
-            <article class="price-card">
-                <h3 class="price-name">Старт</h3>
-                <div class="price-value">8 000 ₴</div>
-                <ul class="price-features">
-                    <li>✅ Односторінковий лендинг</li>
-                    <li>✅ Адаптивний дизайн</li>
-                    <li>✅ Форма зворотного зв'язку</li>
-                    <li>✅ Базове SEO</li>
-                    <li>❌ Інтеграції</li>
-                </ul>
-                <a href="#contact" class="btn btn-ghost btn-block">Обрати</a>
-            </article>
-            <article class="price-card price-featured">
-                <div class="price-badge">Популярний</div>
-                <h3 class="price-name">Бізнес</h3>
-                <div class="price-value">25 000 ₴</div>
-                <ul class="price-features">
-                    <li>✅ Корпоративний сайт</li>
-                    <li>✅ До 6 сторінок</li>
-                    <li>✅ Анімації та інтерактив</li>
-                    <li>✅ Розширене SEO</li>
-                    <li>✅ Інтеграція з CRM</li>
-                </ul>
-                <a href="#contact" class="btn btn-primary btn-block">Обрати</a>
-            </article>
-            <article class="price-card">
-                <h3 class="price-name">Premium</h3>
-                <div class="price-value">60 000 ₴</div>
-                <ul class="price-features">
-                    <li>✅ Інтернет-магазин / вебдодаток</li>
-                    <li>✅ Індивідуальний дизайн</li>
-                    <li>✅ Платіжні системи</li>
-                    <li>✅ Повне SEO + аналітика</li>
-                    <li>✅ 3 місяці підтримки</li>
-                </ul>
-                <a href="#contact" class="btn btn-ghost btn-block">Обрати</a>
-            </article>
         </div>
     </div>
 </section>
@@ -225,60 +360,54 @@
 <section id="contact" class="contact">
     <div class="container">
         <div class="section-head">
-            <span class="section-tag">Зв'язок</span>
-            <h2>Замовити проєкт</h2>
+            <span class="section-tag">Контакти</span>
+            <h2>Зв'яжіться з нами</h2>
         </div>
-        <div class="contact-wrap">
-            <div class="contact-info">
-                <h3>Розкажіть про вашу ідею</h3>
-                <p>Заповніть форму, і ми зв'яжемось з вами протягом 24 годин для безкоштовної консультації.</p>
-                <ul class="contact-list">
-                    <li>📧 <a href="mailto:ivanmishin903@gmail.com">ivanmishin903@gmail.com</a></li>
-                    <li>📱 <a href="tel:+380689835736">+380 68 983 57 36</a></li>
-                    <li>📍 Київ, Україна</li>
-                </ul>
+        <div class="contact-info">
+            <div class="contact-item">
+                <span class="contact-icon">📧</span>
+                <a href="mailto:ivanmishin903@gmail.com">ivanmishin903@gmail.com</a>
             </div>
-            <form class="contact-form" id="contactForm" action="https://formsubmit.co/ivanmishin903@gmail.com" method="POST">
-                <div class="form-group">
-                    <label for="name">Ім'я</label>
-                    <input type="text" id="name" name="name" placeholder="Ваше ім'я" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="you@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="budget">Бюджет</label>
-                    <select id="budget" name="budget">
-                        <option value="">Оберіть діапазон</option>
-                        <option value="0-10k">до 10 000 ₴</option>
-                        <option value="10k-30k">10 000 — 30 000 ₴</option>
-                        <option value="30k-60k">30 000 — 60 000 ₴</option>
-                        <option value="60k+">60 000 ₴+</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="message">Опис проєкту</label>
-                    <textarea id="message" name="message" rows="4" placeholder="Що потрібно зробити?" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Надіслати заявку</button>
-                <p class="form-note" id="formNote"></p>
-            </form>
+            <div class="contact-item">
+                <span class="contact-icon">📱</span>
+                <a href="tel:+380689835736">+380 68 983 57 36</a>
+            </div>
         </div>
+        <form class="contact-form" id="contactForm" action="https://formsubmit.co/ivanmishin903@gmail.com" method="POST">
+            <div class="form-row">
+                <input type="text" name="name" placeholder="Ваше ім'я" required>
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <select name="budget" required>
+                <option value="" disabled selected>Тип запиту</option>
+                <option value="platform">Платформа LifeStock</option>
+                <option value="module">Розробка модуля</option>
+                <option value="integration">Інтеграція</option>
+                <option value="support">Підтримка</option>
+            </select>
+            <textarea name="message" rows="4" placeholder="Опишіть ваш запит" required></textarea>
+            <button type="submit" class="btn btn-primary">Відправити</button>
+            <p class="form-note" id="formNote"></p>
+        </form>
     </div>
 </section>
 
 <!-- ===== FOOTER ===== -->
 <footer class="footer">
     <div class="container footer-inner">
-        <span class="logo logo-footer"><span class="logo-mark">●</span> GreenPixel <span class="logo-accent">Studio</span></span>
-        <p class="footer-copy">© 2026 GreenPixel Studio. Створено з ❤️ в Україні.</p>
+        <a href="#top" class="logo">
+            <span class="logo-mark">📦</span> Life<span class="logo-accent">Stock</span>
+        </a>
+        <p class="footer-copy">Platform Specification 1.0 · Ядро не залежить від ШІ</p>
         <nav class="footer-nav">
-            <a href="#services">Послуги</a>
-            <a href="#portfolio">Портфоліо</a>
-            <a href="#pricing">Ціни</a>
+            <a href="#core">Ядро</a>
+            <a href="#extensions">Розширення</a>
+            <a href="#modules">Модулі</a>
+            <a href="#ai">AI</a>
+            <a href="#roadmap">Roadmap</a>
             <a href="#contact">Контакти</a>
         </nav>
+        <p class="footer-copy">© 2026 LifeStock · Built by GreenPixel Studio</p>
     </div>
 </footer>
 
