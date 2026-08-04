@@ -185,7 +185,7 @@ const App = (function () {
             <div class="ls-scan-placeholder" id="lsScanPlaceholder">
               <span>📷</span>
               <p>Натисни "Увімкнути камеру" та наведи на штрихкод</p>
-              <p class="ls-scan-hint">Підтримуються EAN-13, EAN-8, UPC, Code-128</p>
+              <p class="ls-scan-hint">Підтримуються EAN-13, EAN-8, UPC, Code-128, QR</p>
             </div>
             <div class="ls-scan-result" id="lsScanResult" style="display:none"></div>
           </div>
@@ -255,9 +255,14 @@ const App = (function () {
     const placeholder = document.getElementById('lsScanPlaceholder');
     const result = document.getElementById('lsScanResult');
     const status = document.getElementById('lsScanStatus');
+    const viewport = document.getElementById('lsScanViewport');
 
     if (cam.isCameraActive()) {
       cam.stopLiveScan();
+      // Clean up: remove video, frame, pulse elements
+      if (viewport) {
+        viewport.querySelectorAll('video, .ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
+      }
       if (btn) btn.style.display = '';
       if (stopBtn) stopBtn.style.display = 'none';
       if (placeholder) placeholder.style.display = '';
@@ -267,17 +272,23 @@ const App = (function () {
       return;
     }
 
-    if (typeof Quagga === 'undefined') {
-      App.toast('❌ Бібліотека сканування не завантажена. Перевір інтернет.', 'error');
-      return;
-    }
-
     // Hide placeholder, show loading
     if (placeholder) placeholder.style.display = 'none';
     if (result) result.style.display = 'none';
     if (status) status.innerHTML = '<span class="ls-scan-loading">🔄 Запуск камери...</span>';
 
-    const viewport = document.getElementById('lsScanViewport');
+    // Add scanning frame overlay for visual guide
+    if (viewport) {
+      var frame = document.createElement('div');
+      frame.className = 'ls-scan-frame';
+      viewport.appendChild(frame);
+      var pulse = document.createElement('div');
+      pulse.className = 'ls-scan-pulse';
+      viewport.appendChild(pulse);
+    }
+
+    const engine = cam.hasNativeDetector() ? 'BarcodeDetector API' : 'QuaggaJS';
+    console.log('[CameraAI] Scanning engine:', engine);
 
     cam.startLiveScan(
       viewport,
@@ -285,16 +296,23 @@ const App = (function () {
         // Barcode detected!
         if (status) status.innerHTML = '<span class="ls-scan-detected">✅ Знайдено: ' + code + '</span>';
         performScan(code);
-        // Optionally stop camera after detection
+        // Stop camera after detection
         setTimeout(() => {
           if (cam.isCameraActive()) {
             cam.stopLiveScan();
+            if (viewport) {
+              viewport.querySelectorAll('video, .ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
+            }
             if (btn) btn.style.display = '';
             if (stopBtn) stopBtn.style.display = 'none';
+            if (placeholder) placeholder.style.display = '';
           }
-        }, 1500);
+        }, 2000);
       },
       (err) => {
+        if (viewport) {
+          viewport.querySelectorAll('.ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
+        }
         if (status) status.innerHTML = '<span class="ls-scan-error">❌ Камера недоступна. ' + (err.message || 'Дозволи не надано') + '</span>';
         if (placeholder) placeholder.style.display = '';
         App.toast('❌ Камера недоступна. Дозволи не надано?', 'error');
@@ -303,7 +321,7 @@ const App = (function () {
 
     if (btn) btn.style.display = 'none';
     if (stopBtn) stopBtn.style.display = '';
-    if (status) status.innerHTML = '<span class="ls-scan-live">🔴 Камера активна — наведи на штрихкод</span>';
+    if (status) status.innerHTML = '<span class="ls-scan-live">🔴 Камера активна (' + engine + ') — наведи на штрихкод</span>';
   }
 
   function performScan(code) {
