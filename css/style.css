@@ -452,3 +452,20 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85rem}
 .nav-demo{color:var(--green-d) !important;font-weight:700 !important}
 .nav-demo::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px;animation:pulse-dot 1.5s ease-in-out infinite}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ===== REAL CAMERA SCAN ===== */
+.ls-scan-area{display:flex;flex-direction:column;gap:12px;align-items:center}
+.ls-scan-viewport{position:relative;width:100%;max-width:300px;aspect-ratio:3/4;background:#0d1a0d;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:300px}
+.ls-scan-viewport video,.ls-scan-viewport canvas{width:100%!important;height:100%!important;object-fit:cover;border-radius:12px}
+.ls-scan-viewport canvas.drawingBuffer{position:absolute!important;top:0;left:0}
+.ls-scan-buttons{display:flex;gap:10px}
+.ls-scan-status{text-align:center;font-size:.85rem;min-height:24px}
+.ls-scan-live{color:#e74c3c;font-weight:600;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.ls-scan-loading{color:var(--green)}
+.ls-scan-detected{color:var(--green-d);font-weight:600}
+.ls-scan-error{color:#e74c3c}
+.ls-scan-hint{font-size:.75rem;color:#777;margin-top:6px}
+.ls-scan-manual{background:#f8fef9;border:1px solid #e8f5ee;border-radius:10px;padding:16px}
+.ls-scan-manual h4{font-size:.9rem;margin-bottom:10px}
+.ls-scan-bt-hint{font-size:.78rem;color:var(--green-d);margin-top:8px;background:rgba(46,204,113,.08);padding:8px 10px;border-radius:6px}
