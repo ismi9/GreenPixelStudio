@@ -195,49 +195,18 @@
     </div>
 </section>
 
-<!-- ===== INTERACTIVE SCANNER DEMO ===== -->
-<section class="scanner-demo-section">
+<!-- ===== LIFE STOCK WORKING APP ===== -->
+<section class="ls-app-section">
     <div class="container">
         <div class="section-head">
-            <span class="section-tag">Інтерактивне демо</span>
-            <h2>Спробуй сканер штрихкоду</h2>
-            <p class="section-sub">Введи штрихкод вручну або згенеруй випадковий — платформа розпізнає товар.</p>
+            <span class="section-tag">Робоче ядро 1.0</span>
+            <h2>LifeStock — жива демонстрація</h2>
+            <p class="section-sub">10 модулів працюють прямо у твоєму браузері. Дані зберігаються локально, без сервера та без AI.</p>
         </div>
-        <div class="scanner-demo">
-            <div class="scanner-screen">
-                <div class="scanner-viewport" id="scannerViewport">
-                    <div class="scanner-laser" id="scannerLaser"></div>
-                    <div class="scanner-corners">
-                        <span class="corner tl"></span>
-                        <span class="corner tr"></span>
-                        <span class="corner bl"></span>
-                        <span class="corner br"></span>
-                    </div>
-                    <div class="scanner-placeholder" id="scannerPlaceholder">
-                        <span>📷</span>
-                        <p>Натисни "Сканувати"</p>
-                    </div>
-                    <div class="scanner-result" id="scannerResult" style="display:none">
-                        <div class="scan-product-icon" id="scanProductIcon">📦</div>
-                        <div class="scan-product-name" id="scanProductName">—</div>
-                        <div class="scan-product-meta" id="scanProductMeta">—</div>
-                    </div>
-                </div>
-            </div>
-            <div class="scanner-controls">
-                <div class="scanner-input-row">
-                    <input type="text" id="barcodeInput" placeholder="Введи штрихкод (напр. 48200)" maxlength="13">
-                    <button class="btn btn-primary" id="scanBtn">📷 Сканувати</button>
-                </div>
-                <button class="btn btn-ghost btn-sm" id="randomBarcodeBtn">🎲 Випадковий штрихкод</button>
-                <div class="scanner-history" id="scannerHistory">
-                    <h4>Історія сканувань</h4>
-                    <div class="history-empty">Порожньо — відскануй перший товар</div>
-                </div>
-            </div>
-        </div>
+        <div id="lifestock-app"></div>
     </div>
 </section>
+
 <!-- ===== AI PLATFORM ===== -->
 <section id="ai" class="ai-section">
     <div class="container">
@@ -297,60 +266,22 @@
             <div class="automation-row">
                 <div class="automation-block automation-if">
                     <h4>Якщо</h4>
-                    <label class="automation-toggle">
-                        <input type="checkbox" data-rule="low-stock" checked>
-                        <span class="toggle-icon">📉</span>
-                        <span>Залишок &lt; мінімального</span>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="automation-toggle">
-                        <input type="checkbox" data-rule="expiry" checked>
-                        <span class="toggle-icon">⏳</span>
-                        <span>Термін придатності ≤ 3 днів</span>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="automation-toggle">
-                        <input type="checkbox" data-rule="temp">
-                        <span class="toggle-icon">🌡️</span>
-                        <span>Температура в холодильнику вища за норму</span>
-                        <span class="toggle-switch"></span>
-                    </label>
+                    <div class="automation-item"><span>📉</span> Залишок &lt; мінімального</div>
+                    <div class="automation-item"><span>⏳</span> Термін придатності ≤ 3 днів</div>
+                    <div class="automation-item"><span>🌡️</span> Температура в холодильнику вища за норму</div>
                 </div>
-                <div class="automation-arrow" id="automationArrow">→</div>
+                <div class="automation-arrow">→</div>
                 <div class="automation-block automation-then">
                     <h4>Тоді</h4>
-                    <label class="automation-toggle">
-                        <input type="checkbox" data-action="notify" checked>
-                        <span class="toggle-icon">🔔</span>
-                        <span>Надіслати сповіщення</span>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="automation-toggle">
-                        <input type="checkbox" data-action="shopping" checked>
-                        <span class="toggle-icon">🛒</span>
-                        <span>Додати до списку покупок</span>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="automation-toggle">
-                        <input type="checkbox" data-action="task">
-                        <span class="toggle-icon">📋</span>
-                        <span>Створити завдання</span>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="automation-toggle">
-                        <input type="checkbox" data-action="priority">
-                        <span class="toggle-icon">⏰</span>
-                        <span>Позначити партію для першочергового використання</span>
-                        <span class="toggle-switch"></span>
-                    </label>
+                    <div class="automation-item"><span>🔔</span> Надіслати сповіщення</div>
+                    <div class="automation-item"><span>🛒</span> Додати товар до списку покупок</div>
+                    <div class="automation-item"><span>📋</span> Створити завдання</div>
+                    <div class="automation-item"><span>⏰</span> Позначити партію для першочергового використання</div>
                 </div>
             </div>
-            <div class="automation-preview" id="automationPreview">
-                <div class="automation-preview-label">Активне правило:</div>
-                <div class="automation-preview-text" id="automationPreviewText">Якщо залишок &lt; мінімального та термін ≤ 3 днів → надіслати сповіщення та додати до списку покупок</div>
+            <div class="automation-note-info">
+                <p>💡 Автоматизації працюють в Living Stock — спробуйте в розділі "Сповіщення" вище. Дані перевіряються локально при кожній зміні.</p>
             </div>
-            <button class="btn btn-primary" id="testAutomationBtn">▶ Тестувати правило</button>
-            <div class="automation-test-result" id="automationTestResult" style="display:none"></div>
         </div>
     </div>
 </section>
@@ -495,6 +426,21 @@
     </div>
 </footer>
 
+<!-- LifeStock Core 1.0 — 10 stable modules -->
+<script src="js/core/lifestock.js"></script>
+<script src="js/core/product.js"></script>
+<script src="js/core/batch.js"></script>
+<script src="js/core/inventory.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/barcode.js"></script>
+<script src="js/core/camera.js"></script>
+<script src="js/core/recipe.js"></script>
+<script src="js/core/notification.js"></script>
+<script src="js/core/security.js"></script>
+<script src="js/core/sync.js"></script>
+<!-- App controller -->
+<script src="js/app.js"></script>
+<!-- Legacy UI (nav, smooth scroll, contact form) -->
 <script src="js/script.js"></script>
 </body>
 </html>
