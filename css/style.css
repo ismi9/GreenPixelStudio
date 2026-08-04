@@ -455,9 +455,15 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85rem}
 
 /* ===== REAL CAMERA SCAN ===== */
 .ls-scan-area{display:flex;flex-direction:column;gap:12px;align-items:center}
-.ls-scan-viewport{position:relative;width:100%;max-width:300px;aspect-ratio:3/4;background:#0d1a0d;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:300px}
+.ls-scan-viewport{position:relative;width:100%;max-width:320px;min-height:380px;background:#0d1a0d;border-radius:12px;overflow:hidden}
 .ls-scan-viewport video,.ls-scan-viewport canvas{width:100%!important;height:100%!important;object-fit:cover;border-radius:12px}
+.ls-scan-video{position:absolute;top:0;left:0;width:100%!important;height:100%!important;object-fit:cover;border-radius:12px}
 .ls-scan-viewport canvas.drawingBuffer{position:absolute!important;top:0;left:0}
+/* Scanning frame overlay (visual guide for user) */
+.ls-scan-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70%;height:40%;border:2px solid rgba(46,204,113,.6);border-radius:8px;pointer-events:none;z-index:10}
+.ls-scan-frame::before,.ls-scan-frame::after,.ls-scan-frame .ls-c-tl,.ls-scan-frame .ls-c-br{content:'';position:absolute;width:24px;height:24px;border:3px solid var(--green);border-radius:2px}
+.ls-scan-frame::before{top:-3px;left:-3px;border-right:none;border-bottom:none}
+.ls-scan-frame::after{bottom:-3px;right:-3px;border-left:none;border-top:none}
 .ls-scan-buttons{display:flex;gap:10px}
 .ls-scan-status{text-align:center;font-size:.85rem;min-height:24px}
 .ls-scan-live{color:#e74c3c;font-weight:600;animation:blink 1s infinite}
@@ -469,3 +475,6 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85rem}
 .ls-scan-manual{background:#f8fef9;border:1px solid #e8f5ee;border-radius:10px;padding:16px}
 .ls-scan-manual h4{font-size:.9rem;margin-bottom:10px}
 .ls-scan-bt-hint{font-size:.78rem;color:var(--green-d);margin-top:8px;background:rgba(46,204,113,.08);padding:8px 10px;border-radius:6px}
+/* Scanning animation indicator */
+.ls-scan-pulse{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60%;height:3px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scan-pulse 2s ease-in-out infinite;z-index:5;box-shadow:0 0 8px var(--green)}
+@keyframes scan-pulse{0%,100%{top:25%}50%{top:75%}}
