@@ -467,43 +467,84 @@ const App = (function () {
   function performScan(code) {
     const placeholder = document.getElementById('lsScanPlaceholder');
     const result = document.getElementById('lsScanResult');
+    const status = document.getElementById('lsScanStatus');
     if (placeholder) placeholder.style.display = 'none';
-    if (result) result.style.display = 'none';
+    if (result) { result.style.display = 'none'; result.innerHTML = ''; }
+    if (status) status.innerHTML = '<span class="ls-scan-loading">🔍 Пошук товару...</span>';
 
-    const res = mod('BarcodeRegistry').lookup(code);
+    // Use full lookup: local DB first, then OpenFoodFacts API
+    mod('BarcodeRegistry').lookupFull(code, function (res) {
+      if (status) status.innerHTML = '';
 
-    if (res.found) {
-      const p = res.product;
-      if (result) {
-        result.style.display = 'block';
-        result.innerHTML = `
-          <div class="ls-scan-product">
-            <div class="ls-scan-icon">${p.icon}</div>
-            <div class="ls-scan-name">${p.name}</div>
-            <div class="ls-scan-meta">${p.price} ₴ · ${p.unit} · ${res.source === 'registry' ? 'з реєстру' : 'з бази'}</div>
-            <button class="ls-btn-primary ls-btn-sm" style="margin-top:8px" onclick="App.addBatch('${p.id}')">📦 Додати партію</button>
-          </div>
-        `;
+      if (res.found) {
+        const p = res.product;
+        const sourceLabel = res.source === 'user' ? 'з бази' : res.source === 'registry' ? 'з реєстру' : res.source === 'OpenFoodFacts' ? 'з OpenFoodFacts' : 'знайдено';
+        if (result) {
+          result.style.display = 'block';
+          result.innerHTML = buildScanResultHTML(p, code, sourceLabel);
+        }
+        scanHistory.unshift({ icon: p.icon, name: p.name, code, manufacturer: p.manufacturer || '' });
+        if (scanHistory.length > 8) scanHistory.pop();
+        renderScanHistory();
+        App.toast('✅ Знайдено: ' + p.name, 'ok');
+      } else if (res.source === 'GS1' && res.country) {
+        // Only country detected from GS1 prefix
+        if (result) {
+          result.style.display = 'block';
+          result.innerHTML = `
+            <div class="ls-scan-product">
+              <div class="ls-scan-icon">🌐</div>
+              <div class="ls-scan-name">Країна: ${res.country}</div>
+              <div class="ls-scan-meta">Код: ${code} · виробник невідомий</div>
+              <button class="ls-btn-primary ls-btn-sm" style="margin-top:8px" onclick="App.addProductWithBarcode('${code}')">➕ Додати вручну</button>
+            </div>
+          `;
+        }
+        App.toast('🌐 Країна: ' + res.country + '. Товар не знайдено в базі.', 'warn');
+      } else {
+        if (result) {
+          result.style.display = 'block';
+          result.innerHTML = `
+            <div class="ls-scan-product">
+              <div class="ls-scan-icon">❓</div>
+              <div class="ls-scan-name">Невідомий товар</div>
+              <div class="ls-scan-meta">Код: ${code}</div>
+              <button class="ls-btn-primary ls-btn-sm" style="margin-top:8px" onclick="App.addProductWithBarcode('${code}')">➕ Додати вручну</button>
+            </div>
+          `;
+        }
+        App.toast('❓ Невідомий код: ' + code, 'warn');
       }
-      scanHistory.unshift({ icon: p.icon, name: p.name, code });
-      if (scanHistory.length > 8) scanHistory.pop();
-      renderScanHistory();
-      App.toast(`✅ Знайдено: ${p.name}`, 'ok');
+      refreshAll();
+    });
+  }
+
+  function buildScanResultHTML(p, code, sourceLabel) {
+    var html = '<div class="ls-scan-product">';
+    if (p.imageUrl) {
+      html += '<img class="ls-scan-img" src="' + p.imageUrl + '" alt="' + p.name + '" onerror="this.style.display=\'none\'">';
     } else {
-      if (result) {
-        result.style.display = 'block';
-        result.innerHTML = `
-          <div class="ls-scan-product">
-            <div class="ls-scan-icon">❓</div>
-            <div class="ls-scan-name">Невідомий товар</div>
-            <div class="ls-scan-meta">Код: ${code}</div>
-            <button class="ls-btn-primary ls-btn-sm" style="margin-top:8px" onclick="App.addProductWithBarcode('${code}')">➕ Додати вручну</button>
-          </div>
-        `;
-      }
-      App.toast(`❓ Невідомий код: ${code}`, 'warn');
+      html += '<div class="ls-scan-icon">' + (p.icon || '📦') + '</div>';
     }
-    refreshAll();
+    html += '<div class="ls-scan-name">' + p.name + '</div>';
+    html += '<div class="ls-scan-meta">' + (p.price || 0) + ' ₴ · ' + (p.unit || 'шт') + ' · ' + sourceLabel + '</div>';
+
+    // Manufacturer / brand / country block
+    var info = [];
+    if (p.manufacturer) info.push('🏭 ' + p.manufacturer);
+    if (p.brand && p.brand !== p.manufacturer) info.push('🏷️ ' + p.brand);
+    if (p.country) info.push('🌐 ' + p.country);
+    if (p.quantity) info.push('📦 ' + p.quantity);
+    if (p.nutritionGrade) info.push('📊 Nutri: ' + p.nutritionGrade.toUpperCase());
+    if (info.length > 0) {
+      html += '<div class="ls-scan-info">' + info.map(function (i) { return '<div>' + i + '</div>'; }).join('') + '</div>';
+    }
+
+    html += '<div class="ls-scan-actions">';
+    html += '<button class="ls-btn-primary ls-btn-sm" onclick="App.addBatch(\'' + p.id + '\')">📦 Додати партію</button>';
+    html += '</div>';
+    html += '</div>';
+    return html;
   }
 
   function toggleAI(enabled) {
