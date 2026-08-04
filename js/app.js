@@ -180,24 +180,37 @@ const App = (function () {
     const cam = mod('CameraAI');
     document.getElementById('panel-scan').innerHTML = `
       <div class="ls-scan-layout">
-        <div class="ls-scan-viewport">
-          <div class="ls-scan-laser" id="lsLaser"></div>
-          <div class="ls-scan-corners"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span></div>
-          <div class="ls-scan-placeholder" id="lsScanPlaceholder"><span>📷</span><p>Введіть штрихкод або згенеруйте випадковий</p></div>
-          <div class="ls-scan-result" id="lsScanResult" style="display:none"></div>
+        <div class="ls-scan-area">
+          <div class="ls-scan-viewport" id="lsScanViewport">
+            <div class="ls-scan-placeholder" id="lsScanPlaceholder">
+              <span>📷</span>
+              <p>Натисни "Увімкнути камеру" та наведи на штрихкод</p>
+              <p class="ls-scan-hint">Підтримуються EAN-13, EAN-8, UPC, Code-128</p>
+            </div>
+            <div class="ls-scan-result" id="lsScanResult" style="display:none"></div>
+          </div>
+          <div class="ls-scan-buttons">
+            <button class="ls-btn-primary" id="lsCameraBtn" onclick="App.toggleCamera()">📷 Увімкнути камеру</button>
+            <button class="ls-btn-ghost" id="lsStopBtn" onclick="App.toggleCamera()" style="display:none">⏹ Зупинити</button>
+          </div>
+          <div class="ls-scan-status" id="lsScanStatus"></div>
         </div>
         <div class="ls-scan-controls">
-          <div class="ls-scan-row">
-            <input type="text" id="lsBarcodeInput" placeholder="Штрихкод" class="ls-input" maxlength="13">
-            <button class="ls-btn-primary" onclick="App.doScan()">📷 Сканувати</button>
+          <div class="ls-scan-manual">
+            <h4>📝 Ручний ввід</h4>
+            <div class="ls-scan-row">
+              <input type="text" id="lsBarcodeInput" placeholder="Введи штрихкод" class="ls-input" maxlength="13">
+              <button class="ls-btn-primary" onclick="App.doScan()">Пошук</button>
+            </div>
+            <button class="ls-btn-ghost ls-btn-sm" onclick="App.randomScan()">🎲 Випадковий штрихкод</button>
+            <p class="ls-scan-bt-hint">💡 Bluetooth-сканер працює автоматично — просто введи код у поле вище</p>
           </div>
-          <button class="ls-btn-ghost" onclick="App.randomScan()">🎲 Випадковий</button>
           <div class="ls-ai-toggle">
             <label>
               <input type="checkbox" id="lsAiToggle" ${cam.isAIEnabled() ? 'checked' : ''} onchange="App.toggleAI(this.checked)">
-              <span>🤖 AI-аналіз (опціонально, за згодою)</span>
+              <span>🤖 AI-аналіз (опціонально)</span>
             </label>
-            <p class="ls-ai-note">⚠️ Ядро працює без AI. Увімкніть для фото-аналізу та OCR.</p>
+            <p class="ls-ai-note">⚠️ Ядро працює без AI. Розпізнавання штрихкодів — без AI.</p>
           </div>
           <div id="lsScanHistory" class="ls-scan-history">
             <h4>Історія сканувань</h4>
@@ -224,7 +237,7 @@ const App = (function () {
 
   function doScan() {
     const code = document.getElementById('lsBarcodeInput').value.trim();
-    if (!code || code.length < 3) { App.toast('⚠️ Введіть штрихкод (мінімум 3 символи)', 'warn'); return; }
+    if (!code || code.length < 3) { App.toast('⚠️ Введи штрихкод (мінімум 3 символи)', 'warn'); return; }
     performScan(code);
   }
 
@@ -234,20 +247,76 @@ const App = (function () {
     performScan(code);
   }
 
-  function performScan(code) {
-    const laser = document.getElementById('lsLaser');
+  // Toggle live camera scanning
+  function toggleCamera() {
+    const cam = mod('CameraAI');
+    const btn = document.getElementById('lsCameraBtn');
+    const stopBtn = document.getElementById('lsStopBtn');
     const placeholder = document.getElementById('lsScanPlaceholder');
     const result = document.getElementById('lsScanResult');
-    placeholder.style.display = 'none';
-    result.style.display = 'none';
-    laser.classList.add('active');
+    const status = document.getElementById('lsScanStatus');
 
-    setTimeout(() => {
-      laser.classList.remove('active');
-      const res = mod('BarcodeRegistry').lookup(code);
+    if (cam.isCameraActive()) {
+      cam.stopLiveScan();
+      if (btn) btn.style.display = '';
+      if (stopBtn) stopBtn.style.display = 'none';
+      if (placeholder) placeholder.style.display = '';
+      if (result) result.style.display = 'none';
+      if (status) status.innerHTML = '';
+      App.toast('📷 Камеру зупинено', 'info');
+      return;
+    }
 
-      if (res.found) {
-        const p = res.product;
+    if (typeof Quagga === 'undefined') {
+      App.toast('❌ Бібліотека сканування не завантажена. Перевір інтернет.', 'error');
+      return;
+    }
+
+    // Hide placeholder, show loading
+    if (placeholder) placeholder.style.display = 'none';
+    if (result) result.style.display = 'none';
+    if (status) status.innerHTML = '<span class="ls-scan-loading">🔄 Запуск камери...</span>';
+
+    const viewport = document.getElementById('lsScanViewport');
+
+    cam.startLiveScan(
+      viewport,
+      (code) => {
+        // Barcode detected!
+        if (status) status.innerHTML = '<span class="ls-scan-detected">✅ Знайдено: ' + code + '</span>';
+        performScan(code);
+        // Optionally stop camera after detection
+        setTimeout(() => {
+          if (cam.isCameraActive()) {
+            cam.stopLiveScan();
+            if (btn) btn.style.display = '';
+            if (stopBtn) stopBtn.style.display = 'none';
+          }
+        }, 1500);
+      },
+      (err) => {
+        if (status) status.innerHTML = '<span class="ls-scan-error">❌ Камера недоступна. ' + (err.message || 'Дозволи не надано') + '</span>';
+        if (placeholder) placeholder.style.display = '';
+        App.toast('❌ Камера недоступна. Дозволи не надано?', 'error');
+      }
+    );
+
+    if (btn) btn.style.display = 'none';
+    if (stopBtn) stopBtn.style.display = '';
+    if (status) status.innerHTML = '<span class="ls-scan-live">🔴 Камера активна — наведи на штрихкод</span>';
+  }
+
+  function performScan(code) {
+    const placeholder = document.getElementById('lsScanPlaceholder');
+    const result = document.getElementById('lsScanResult');
+    if (placeholder) placeholder.style.display = 'none';
+    if (result) result.style.display = 'none';
+
+    const res = mod('BarcodeRegistry').lookup(code);
+
+    if (res.found) {
+      const p = res.product;
+      if (result) {
         result.style.display = 'block';
         result.innerHTML = `
           <div class="ls-scan-product">
@@ -257,10 +326,13 @@ const App = (function () {
             <button class="ls-btn-primary ls-btn-sm" style="margin-top:8px" onclick="App.addBatch('${p.id}')">📦 Додати партію</button>
           </div>
         `;
-        scanHistory.unshift({ icon: p.icon, name: p.name, code });
-        if (scanHistory.length > 8) scanHistory.pop();
-        renderScanHistory();
-      } else {
+      }
+      scanHistory.unshift({ icon: p.icon, name: p.name, code });
+      if (scanHistory.length > 8) scanHistory.pop();
+      renderScanHistory();
+      App.toast(`✅ Знайдено: ${p.name}`, 'ok');
+    } else {
+      if (result) {
         result.style.display = 'block';
         result.innerHTML = `
           <div class="ls-scan-product">
@@ -271,8 +343,9 @@ const App = (function () {
           </div>
         `;
       }
-      refreshAll();
-    }, 800);
+      App.toast(`❓ Невідомий код: ${code}`, 'warn');
+    }
+    refreshAll();
   }
 
   function toggleAI(enabled) {
@@ -620,7 +693,7 @@ const App = (function () {
   }
 
   return { init, addProduct, addProductWithBarcode, addBatch, addRecipe, addStorage,
-    doScan, randomScan, toggleAI, markRead, markAllRead, clearAlerts, syncNow,
+    doScan, randomScan, toggleCamera, toggleAI, markRead, markAllRead, clearAlerts, syncNow,
     switchUser, exportData, importData, resetData, toast };
 })();
 
