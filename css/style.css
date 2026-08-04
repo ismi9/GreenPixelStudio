@@ -447,3 +447,8 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85rem}
   .ls-tabs{font-size:.78rem}
   .ls-tab{padding:10px 12px}
 }
+
+/* Demo nav link highlight */
+.nav-demo{color:var(--green-d) !important;font-weight:700 !important}
+.nav-demo::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px;animation:pulse-dot 1.5s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
