@@ -25,6 +25,13 @@ LifeStock.register('ProductCore', (function () {
       minStock: data.minStock || 0,
       price: data.price || 0,
       icon: data.icon || '📦',
+      manufacturer: data.manufacturer || '',
+      brand: data.brand || '',
+      country: data.country || '',
+      imageUrl: data.imageUrl || '',
+      ingredients: data.ingredients || '',
+      nutritionGrade: data.nutritionGrade || '',
+      quantity: data.quantity || '',
       createdAt: new Date().toISOString(),
     };
     products.push(p);
@@ -36,6 +43,12 @@ LifeStock.register('ProductCore', (function () {
   function update(id, patch) {
     const p = products.find(x => x.id === id);
     if (!p) return null;
+    if (patch.manufacturer !== undefined) p.manufacturer = patch.manufacturer;
+    if (patch.brand !== undefined) p.brand = patch.brand;
+    if (patch.country !== undefined) p.country = patch.country;
+    if (patch.imageUrl !== undefined) p.imageUrl = patch.imageUrl;
+    if (patch.ingredients !== undefined) p.ingredients = patch.ingredients;
+    if (patch.nutritionGrade !== undefined) p.nutritionGrade = patch.nutritionGrade;
     Object.assign(p, patch, { updatedAt: new Date().toISOString() });
     save();
     LifeStock.emit('product:updated', p);

@@ -498,3 +498,10 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85rem}
 .ls-ocr-conf{font-size:.75rem;color:#999;margin-top:6px}
 .ls-ocr-expiry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .ls-ocr-tag{background:#fff3cd;padding:3px 8px;border-radius:4px;font-size:.78rem;color:#856404;border:1px solid #ffeaa7}
+
+/* ===== SCAN RESULT WITH MANUFACTURER ===== */
+.ls-scan-img{width:100%;max-height:120px;object-fit:contain;border-radius:8px;margin-bottom:8px;background:#f8fef9}
+.ls-scan-info{margin:8px 0;font-size:.78rem;color:#555;line-height:1.6;border-top:1px solid #e8f5ee;padding-top:8px}
+.ls-scan-info div{margin-bottom:2px}
+.ls-scan-actions{display:flex;gap:8px;margin-top:10px}
+.ls-history-mfr{font-size:.72rem;color:var(--green-d);font-weight:500}
