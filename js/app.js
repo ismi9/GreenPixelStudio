@@ -779,18 +779,27 @@ const App = (function () {
     ai.setConsent(checked);
     if (checked) {
       App.toast('✅ Згоду надано', 'ok');
+      // Only re-render if key already saved (switching to active state)
+      // If still on setup screen (key not saved yet), DON'T re-render — it would wipe the input
+      if (ai.hasKey() && ai.isEnabled()) {
+        renderAI();
+      }
+    } else {
+      if (ai.hasKey()) {
+        renderAI();
+      }
     }
-    renderAI();
   }
 
   function connectAI() {
+    // Read values from DOM FIRST, before any state changes
     const keyInput = document.getElementById('lsApiKey');
     const consentEl = document.getElementById('lsAiConsent');
     const key = keyInput ? keyInput.value.trim() : '';
     const consent = consentEl ? consentEl.checked : false;
 
     if (!key) { App.toast('⚠️ Введіть API ключ', 'warn'); return; }
-    if (!consent) { App.toast('⚠️ Потрібна згода на обробку даних', 'warn'); return; }
+    if (!consent) { App.toast('⚠️ Поставте галочку згоди на обробку даних', 'warn'); return; }
 
     const ai = mod('GeminiAI');
     ai.setApiKey(key);
@@ -800,7 +809,7 @@ const App = (function () {
       App.toast('✅ AI підключено: Gemini Flash', 'ok');
       renderAI();
     } else {
-      App.toast('❌ Помилка активації', 'error');
+      App.toast('❌ Помилка активації. Перевірте ключ.', 'error');
     }
   }
 
