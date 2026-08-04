@@ -30,6 +30,7 @@ const App = (function () {
         <button class="ls-tab" data-tab="recipes">🧾 Рецепти</button>
         <button class="ls-tab" data-tab="storage">🏬 Склади</button>
         <button class="ls-tab" data-tab="alerts">🔔 Сповіщення</button>
+        <button class="ls-tab" data-tab="ai">🤖 AI</button>
         <button class="ls-tab" data-tab="settings">⚙️ Налаштування</button>
       </div>
 
@@ -41,6 +42,7 @@ const App = (function () {
         <div class="ls-panel" id="panel-recipes"></div>
         <div class="ls-panel" id="panel-storage"></div>
         <div class="ls-panel" id="panel-alerts"></div>
+        <div class="ls-panel" id="panel-ai"></div>
         <div class="ls-panel" id="panel-settings"></div>
       </div>
     `;
@@ -96,6 +98,7 @@ const App = (function () {
       case 'recipes': renderRecipes(); break;
       case 'storage': renderStorage(); break;
       case 'alerts': renderAlerts(); break;
+      case 'ai': renderAI(); break;
       case 'settings': renderSettings(); break;
     }
   }
@@ -686,6 +689,250 @@ const App = (function () {
   }
 
   // ===== SETTINGS TAB =====
+  // ===== AI TAB =====
+  let aiChatMessages = [];
+
+  function renderAI() {
+    const ai = mod('GeminiAI');
+    const enabled = ai.isEnabled();
+    const hasKey = ai.hasKey();
+    const consent = ai.hasConsent();
+
+    document.getElementById('panel-ai').innerHTML = `
+      <div class="ls-ai-container">
+        <div class="ls-ai-header">
+          <h3>🤖 AI-асистент (Gemini Flash)</h3>
+          <div class="ls-ai-status ${enabled ? 'active' : 'inactive'}">
+            ${enabled ? '✅ Активовано' : '❌ Не активовано'}
+          </div>
+        </div>
+
+        ${!hasKey ? `
+          <div class="ls-ai-setup">
+            <h4>🔑 Підключення AI</h4>
+            <p>AI працює на основі Google Gemini 2.0 Flash. Безкоштовний тариф доступний.</p>
+            <ol class="ls-ai-steps">
+              <li>Відкрий <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+              <li>Створи API ключ (безкоштовно)</li>
+              <li>Встав ключ нижче</li>
+            </ol>
+            <input type="password" class="ls-input ls-ai-key-input" id="lsApiKey" placeholder="Встав Gemini API ключ..." />
+            <label class="ls-ai-consent">
+              <input type="checkbox" id="lsAiConsent" onchange="App.updateAiConsent(this.checked)">
+              <span>Я даю згоду на обробку даних через Google Gemini. AI працює лише за моєю згодою.</span>
+            </label>
+            <button class="ls-btn-primary" onclick="App.connectAI()">🔌 Підключити AI</button>
+          </div>
+        ` : ''}
+
+        ${hasKey && !consent ? `
+          <div class="ls-ai-consent-box">
+            <p>🔑 API ключ збережено (***${ai.hasKey() ? '****' : ''}). Для активації потрібна згода.</p>
+            <label class="ls-ai-consent">
+              <input type="checkbox" id="lsAiConsent2" onchange="App.updateAiConsent(this.checked)">
+              <span>Я даю згоду на обробку даних через Google Gemini.</span>
+            </label>
+            <button class="ls-btn-danger ls-btn-sm" onclick="App.disconnectAI()">🗑️ Видалити ключ</button>
+          </div>
+        ` : ''}
+
+        ${enabled ? `
+          <div class="ls-ai-active">
+            <div class="ls-ai-features">
+              <button class="ls-ai-feature-btn" onclick="App.aiAction('recipes')">🍳 Рецепти</button>
+              <button class="ls-ai-feature-btn" onclick="App.aiAction('analyze')">📊 Аналіз залишків</button>
+              <button class="ls-ai-feature-btn" onclick="App.aiAction('forecast')">🔮 Прогноз закупівель</button>
+              <button class="ls-ai-feature-btn" onclick="App.aiAction('shopping')">🛒 Список покупок</button>
+              <button class="ls-ai-feature-btn" onclick="App.aiPhotoAnalyze()">📸 Аналіз фото</button>
+            </div>
+
+            <div class="ls-ai-chat" id="lsAiChat">
+              ${aiChatMessages.length === 0 ? '<div class="ls-ai-chat-empty">Запитай AI про свої запаси. Наприклад: "Скільки кави залишилось?" або "Що скоро зіпсуеться?"</div>' : ''}
+              ${aiChatMessages.map(m => `
+                <div class="ls-ai-msg ${m.role}">
+                  <div class="ls-ai-msg-icon">${m.role === 'user' ? '👤' : '🤖'}</div>
+                  <div class="ls-ai-msg-text">${m.text}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="ls-ai-input-row">
+              <input type="text" class="ls-input" id="lsAiInput" placeholder="Запитай AI..." onkeypress="if(event.key==='Enter')App.aiSend()" />
+              <button class="ls-btn-primary" onclick="App.aiSend()">↩ Надіслати</button>
+            </div>
+
+            <div class="ls-ai-footer">
+              <button class="ls-btn-ghost ls-btn-sm" onclick="App.aiClearChat()">🗑️ Очистити чат</button>
+              <button class="ls-btn-danger ls-btn-sm" onclick="App.disconnectAI()">🔌 Відключити AI</button>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+    // Scroll chat to bottom
+    var chatEl = document.getElementById('lsAiChat');
+    if (chatEl) chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function updateAiConsent(checked) {
+    const ai = mod('GeminiAI');
+    ai.setConsent(checked);
+    if (checked) {
+      App.toast('✅ Згоду надано', 'ok');
+    }
+    renderAI();
+  }
+
+  function connectAI() {
+    const keyInput = document.getElementById('lsApiKey');
+    const consentEl = document.getElementById('lsAiConsent');
+    const key = keyInput ? keyInput.value.trim() : '';
+    const consent = consentEl ? consentEl.checked : false;
+
+    if (!key) { App.toast('⚠️ Введіть API ключ', 'warn'); return; }
+    if (!consent) { App.toast('⚠️ Потрібна згода на обробку даних', 'warn'); return; }
+
+    const ai = mod('GeminiAI');
+    ai.setApiKey(key);
+    ai.setConsent(true);
+
+    if (ai.isEnabled()) {
+      App.toast('✅ AI підключено: Gemini Flash', 'ok');
+      renderAI();
+    } else {
+      App.toast('❌ Помилка активації', 'error');
+    }
+  }
+
+  function disconnectAI() {
+    if (!confirm('Відключити AI та видалити API ключ?')) return;
+    const ai = mod('GeminiAI');
+    ai.setApiKey('');
+    ai.setConsent(false);
+    ai.clearHistory();
+    aiChatMessages = [];
+    App.toast('🔌 AI відключено', 'info');
+    renderAI();
+  }
+
+  function aiSend() {
+    const input = document.getElementById('lsAiInput');
+    const text = input ? input.value.trim() : '';
+    if (!text) return;
+
+    const ai = mod('GeminiAI');
+    if (!ai.isEnabled()) { App.toast('⚠️ AI не активовано', 'warn'); return; }
+
+    input.value = '';
+    aiChatMessages.push({ role: 'user', text: escapeHtml(text) });
+    renderAI();
+
+    // Show loading
+    aiChatMessages.push({ role: 'model', text: '<i>обмірковую...</i>' });
+    renderAI();
+
+    ai.askQuestion(text).then(function (result) {
+      aiChatMessages.pop(); // remove loading
+      if (result.error) {
+        aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
+      } else {
+        aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+      }
+      renderAI();
+    });
+  }
+
+  function aiAction(action) {
+    const ai = mod('GeminiAI');
+    if (!ai.isEnabled()) { App.toast('⚠️ AI не активовано', 'warn'); return; }
+
+    var labels = {
+      recipes: '🍳 Підбір рецептів...',
+      analyze: '📊 Аналіз залишків...',
+      forecast: '🔮 Прогноз закупівель...',
+      shopping: '🛒 Список покупок...',
+    };
+
+    aiChatMessages.push({ role: 'user', text: labels[action] || action });
+    aiChatMessages.push({ role: 'model', text: '<i>' + (labels[action] || 'обробка...') + '</i>' });
+    renderAI();
+
+    var promise;
+    switch (action) {
+      case 'recipes': promise = ai.suggestRecipes(); break;
+      case 'analyze': promise = ai.analyzeInventory(); break;
+      case 'forecast': promise = ai.forecastPurchases(); break;
+      case 'shopping': promise = ai.generateShoppingList(); break;
+    }
+
+    promise.then(function (result) {
+      aiChatMessages.pop();
+      if (result.error) {
+        aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
+      } else {
+        aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+      }
+      renderAI();
+    });
+  }
+
+  function aiPhotoAnalyze() {
+    const ai = mod('GeminiAI');
+    if (!ai.isEnabled()) { App.toast('⚠️ AI не активовано', 'warn'); return; }
+
+    // Trigger file input
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var base64 = reader.result.split(',')[1];
+        aiChatMessages.push({ role: 'user', text: '📸 Аналіз фото' });
+        aiChatMessages.push({ role: 'model', text: '<i>аналізую фото...</i>' });
+        renderAI();
+
+        ai.analyzePhoto(base64).then(function (result) {
+          aiChatMessages.pop();
+          if (result.error) {
+            aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
+          } else {
+            aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+          }
+          renderAI();
+        });
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  }
+
+  function aiClearChat() {
+    aiChatMessages = [];
+    mod('GeminiAI').clearHistory();
+    renderAI();
+  }
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function formatAiText(text) {
+    if (!text) return '';
+    // Basic formatting: **bold** → <b>, * item → list, line breaks
+    var html = escapeHtml(text);
+    html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    html = html.replace(/^\* (.+)$/gm, '<div class="ls-ai-li">• $1</div>');
+    html = html.replace(/^\d+\. (.+)$/gm, '<div class="ls-ai-li">$1</div>');
+    html = html.replace(/\n/g, '<br>');
+    return html;
+  }
+
   function renderSettings() {
     const sync = mod('SyncManager').getStatus();
     const sec = mod('Security');
@@ -892,7 +1139,7 @@ const App = (function () {
   }
 
   return { init, addProduct, addProductWithBarcode, addBatch, addRecipe, addStorage,
-    doScan, randomScan, toggleCamera, switchScanMode, runOCR, useOCRDate, toggleAI, markRead, markAllRead, clearAlerts, syncNow,
+    doScan, randomScan, toggleCamera, switchScanMode, runOCR, useOCRDate, toggleAI, markRead, markAllRead, clearAlerts, syncNow, renderAI, connectAI, disconnectAI, updateAiConsent, aiSend, aiAction, aiPhotoAnalyze, aiClearChat,
     switchUser, exportData, importData, resetData, toast };
 })();
 
