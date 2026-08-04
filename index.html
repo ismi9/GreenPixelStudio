@@ -208,49 +208,78 @@
     </div>
 </section>
 
-<!-- ===== AI PLATFORM ===== -->
+<!-- ===== AI PLATFORM (GEMINI FLASH) ===== -->
 <section id="ai" class="ai-section">
     <div class="container">
         <div class="section-head">
-            <span class="section-tag">AI-платформа</span>
+            <span class="section-tag">AI-платформа · Google Gemini 2.0 Flash</span>
             <h2>ШІ — окремий сервіс за дозволом користувача</h2>
-            <p class="section-sub">AI працює лише за згодою. Без нього платформа функціонує повноцінно.</p>
+            <p class="section-sub">AI на основі Google Gemini Flash. Працює лише за згодою. Без AI платформа функціонує повноцінно.</p>
         </div>
         <div class="ai-grid">
             <div class="ai-card">
-                <span class="ai-icon">📸</span>
-                <h4>Аналіз фото</h4>
-                <p>Розпізнавання товарів за фотографією, підрахунок кількості на полиці.</p>
-            </div>
-            <div class="ai-card">
-                <span class="ai-icon">🔤</span>
-                <h4>OCR</h4>
-                <p>Зчитування тексту з етикеток: склад, терміни, ціни — без ручного вводу.</p>
+                <span class="ai-icon">💬</span>
+                <h4>Запити до бази</h4>
+                <p>"Скільки кави залишилось?" — відповіді природною мовою на основі вашого інвентарю. Gemini Flash аналізує вашу базу.</p>
+                <div class="ai-badge">Gemini Flash</div>
             </div>
             <div class="ai-card">
                 <span class="ai-icon">🍳</span>
                 <h4>Підбір рецептів</h4>
-                <p>Рецепти на основі наявних залишків. "Що приготувати з того, що є?"</p>
+                <p>Рецепти на основі наявних залишків. "Що приготувати з того, що є?" — Gemini генерує варіанти.</p>
+                <div class="ai-badge">Gemini Flash</div>
+            </div>
+            <div class="ai-card">
+                <span class="ai-icon">📸</span>
+                <h4>Аналіз фото</h4>
+                <p>Розпізнавання товарів за фотографією полиці, підрахунок кількості через Gemini Vision API.</p>
+                <div class="ai-badge">Gemini Vision</div>
             </div>
             <div class="ai-card">
                 <span class="ai-icon">📊</span>
                 <h4>Аналіз залишків</h4>
-                <p>Виявлення надлишків, дефіциту, оптимізація розміщення товарів.</p>
+                <p>Виявлення надлишків, дефіциту, оптимізація розміщення товарів на основі даних інвентарю.</p>
+                <div class="ai-badge">Gemini Flash</div>
             </div>
             <div class="ai-card">
                 <span class="ai-icon">🔮</span>
-                <h4>Прогнозування закупівель</h4>
-                <p>Прогноз попиту на основі історії витрати, сезонності, подій.</p>
+                <h4>Прогноз закупівель</h4>
+                <p>Прогноз попиту на основі поточних залишків, пріоритети закупівлі, орієнтовна вартість.</p>
+                <div class="ai-badge">Gemini Flash</div>
             </div>
             <div class="ai-card">
-                <span class="ai-icon">💬</span>
-                <h4>Запити до бази даних</h4>
-                <p>"Скільки кави залишилось?" — відповіді природною мовою на основі власної бази.</p>
+                <span class="ai-icon">🛒</span>
+                <h4>Смарт-список покупок</h4>
+                <p>Автоматична генерація списку покупок: що закінчується, скільки купити, орієнтовний бюджет.</p>
+                <div class="ai-badge">Gemini Flash</div>
+            </div>
+        </div>
+        <div class="ai-tech-info">
+            <div class="ai-tech-item">
+                <span class="ai-tech-icon">⚡</span>
+                <div>
+                    <h5>Gemini 2.0 Flash</h5>
+                    <p>Швидка модель від Google. Безкоштовний тариф: 15 запитів/хв, 1500/день.</p>
+                </div>
+            </div>
+            <div class="ai-tech-item">
+                <span class="ai-tech-icon">🔑</span>
+                <div>
+                    <h5>Власний API ключ</h5>
+                    <p>Ключ зберігається локально в браузері. Дані не передаються на сервер LifeStock.</p>
+                </div>
+            </div>
+            <div class="ai-tech-item">
+                <span class="ai-tech-icon">🔒</span>
+                <div>
+                    <h5>За згодою користувача</h5>
+                    <p>AI активується тільки після явної згоди. Вимкнення не впливає на роботу платформи.</p>
+                </div>
             </div>
         </div>
         <div class="ai-note">
             <span>🔒</span>
-            <p>ШІ активується тільки за добровільною згодою користувача. Усі дані обробляються локально, коли це можливо. Вимкнення AI не впливає на роботу платформи.</p>
+            <p>ШІ активується тільки за добровільною згодою користувача. API ключ зберігається локально. Дані інвентарю передаються до Google Gemini лише при запиті. Вимкнення AI не впливає на жодну функцію платформи.</p>
         </div>
     </div>
 </section>
@@ -440,6 +469,7 @@
 <script src="js/core/storage.js"></script>
 <script src="js/core/barcode.js"></script>
 <script src="js/core/openfoodfacts.js"></script>
+<script src="js/core/gemini-ai.js"></script>
 <script src="js/core/camera.js"></script>
 <script src="js/core/recipe.js"></script>
 <script src="js/core/notification.js"></script>
