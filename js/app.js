@@ -176,24 +176,36 @@ const App = (function () {
   }
 
   // ===== SCAN TAB =====
+  let scanMode = 'barcode'; // 'barcode' or 'ocr'
+
   function renderScan() {
     const cam = mod('CameraAI');
+    const hasOCR = cam.hasOCR();
     document.getElementById('panel-scan').innerHTML = `
       <div class="ls-scan-layout">
         <div class="ls-scan-area">
+          <div class="ls-scan-mode-toggle">
+            <button class="ls-mode-btn ${scanMode === 'barcode' ? 'active' : ''}" onclick="App.switchScanMode('barcode')">📷 Штрихкод</button>
+            <button class="ls-mode-btn ${scanMode === 'ocr' ? 'active' : ''}" onclick="App.switchScanMode('ocr')" ${hasOCR ? '' : 'disabled'}>🔤 OCR-текст ${hasOCR ? '' : '(не доступний)'}</button>
+          </div>
           <div class="ls-scan-viewport" id="lsScanViewport">
             <div class="ls-scan-placeholder" id="lsScanPlaceholder">
               <span>📷</span>
-              <p>Натисни "Увімкнути камеру" та наведи на штрихкод</p>
-              <p class="ls-scan-hint">Підтримуються EAN-13, EAN-8, UPC, Code-128, QR</p>
+              <p>${scanMode === 'barcode' ? 'Натисни "Увімкнути камеру" та наведи на штрихкод' : 'Натисни "Увімкнути камеру", наведи на текст і тисни "Зчитати текст"'}</p>
+              <p class="ls-scan-hint">${scanMode === 'barcode' ? 'EAN-13, EAN-8, UPC, Code-128, QR' : 'Терміни придатності, етикетки, дати'}</p>
             </div>
             <div class="ls-scan-result" id="lsScanResult" style="display:none"></div>
           </div>
           <div class="ls-scan-buttons">
             <button class="ls-btn-primary" id="lsCameraBtn" onclick="App.toggleCamera()">📷 Увімкнути камеру</button>
+            <button class="ls-btn-primary ls-btn-ocr" id="lsOcrBtn" onclick="App.runOCR()" style="display:none">🔤 Зчитати текст</button>
             <button class="ls-btn-ghost" id="lsStopBtn" onclick="App.toggleCamera()" style="display:none">⏹ Зупинити</button>
           </div>
           <div class="ls-scan-status" id="lsScanStatus"></div>
+          <div class="ls-ocr-progress" id="lsOcrProgress" style="display:none">
+            <div class="ls-ocr-bar"><div class="ls-ocr-fill" id="lsOcrFill"></div></div>
+            <span id="lsOcrProgressText">Підготовка...</span>
+          </div>
         </div>
         <div class="ls-scan-controls">
           <div class="ls-scan-manual">
@@ -210,7 +222,7 @@ const App = (function () {
               <input type="checkbox" id="lsAiToggle" ${cam.isAIEnabled() ? 'checked' : ''} onchange="App.toggleAI(this.checked)">
               <span>🤖 AI-аналіз (опціонально)</span>
             </label>
-            <p class="ls-ai-note">⚠️ Ядро працює без AI. Розпізнавання штрихкодів — без AI.</p>
+            <p class="ls-ai-note">⚠️ Ядро працює без AI. Штрихкоди та OCR — без AI.</p>
           </div>
           <div id="lsScanHistory" class="ls-scan-history">
             <h4>Історія сканувань</h4>
@@ -220,6 +232,120 @@ const App = (function () {
       </div>
     `;
     renderScanHistory();
+  }
+
+  function switchScanMode(mode) {
+    const cam = mod('CameraAI');
+    if (cam.isCameraActive()) cam.stopLiveScan();
+    scanMode = mode;
+    const viewport = document.getElementById('lsScanViewport');
+    if (viewport) viewport.querySelectorAll('video, .ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
+    const btn = document.getElementById('lsCameraBtn');
+    const ocrBtn = document.getElementById('lsOcrBtn');
+    const stopBtn = document.getElementById('lsStopBtn');
+    const placeholder = document.getElementById('lsScanPlaceholder');
+    const result = document.getElementById('lsScanResult');
+    const status = document.getElementById('lsScanStatus');
+    const progress = document.getElementById('lsOcrProgress');
+    if (btn) btn.style.display = '';
+    if (ocrBtn) ocrBtn.style.display = 'none';
+    if (stopBtn) stopBtn.style.display = 'none';
+    if (placeholder) placeholder.style.display = '';
+    if (result) result.style.display = 'none';
+    if (status) status.innerHTML = '';
+    if (progress) progress.style.display = 'none';
+    renderScan();
+  }
+
+  // Run OCR: capture frame and recognize text
+  function runOCR() {
+    const cam = mod('CameraAI');
+    const status = document.getElementById('lsScanStatus');
+    const progress = document.getElementById('lsOcrProgress');
+    const progressText = document.getElementById('lsOcrProgressText');
+    const fill = document.getElementById('lsOcrFill');
+    const ocrBtn = document.getElementById('lsOcrBtn');
+
+    if (!cam.isCameraActive()) { App.toast('⚠️ Спочатку увімкни камеру', 'warn'); return; }
+
+    if (ocrBtn) ocrBtn.disabled = true;
+    if (progress) progress.style.display = 'flex';
+    if (progressText) progressText.textContent = 'Запуск OCR...';
+    if (fill) fill.style.width = '10%';
+
+    cam.captureAndOCR(
+      (result) => {
+        if (progress) progress.style.display = 'none';
+        if (ocrBtn) ocrBtn.disabled = false;
+        displayOCRResult(result);
+      },
+      (err) => {
+        if (progress) progress.style.display = 'none';
+        if (ocrBtn) ocrBtn.disabled = false;
+        if (status) status.innerHTML = '<span class="ls-scan-error">❌ OCR помилка: ' + (err.message || '') + '</span>';
+        App.toast('❌ OCR не вдалося', 'error');
+      }
+    );
+  }
+
+  function displayOCRResult(result) {
+    const resultEl = document.getElementById('lsScanResult');
+    const status = document.getElementById('lsScanStatus');
+    const placeholder = document.getElementById('lsScanPlaceholder');
+
+    if (placeholder) placeholder.style.display = 'none';
+    if (resultEl) resultEl.style.display = 'block';
+
+    const dates = result.dates || [];
+    const expiry = result.expiryInfo || {};
+    const text = result.text || '';
+    const confidence = result.confidence ? Math.round(result.confidence) : 0;
+
+    let html = '<div class="ls-ocr-result">';
+
+    if (dates.length > 0) {
+      html += '<div class="ls-ocr-dates">';
+      html += '<h5>📅 Знайдені дати</h5>';
+      dates.forEach(function (d) {
+        html += '<div class="ls-ocr-date-item">' +
+          '<span class="ls-ocr-date">' + d.formatted + '</span>' +
+          '<button class="ls-btn-primary ls-btn-sm" onclick="App.useOCRDate(\''+ d.formatted + '\')">Використати</button>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+
+    if (expiry.hasExpiryKeywords) {
+      html += '<div class="ls-ocr-expiry-tags">' + expiry.keywords.map(function (k) { return '<span class="ls-ocr-tag">' + k + '</span>'; }).join('') + '</div>';
+    }
+
+    html += '<div class="ls-ocr-text-section">';
+    html += '<h5>📝 Розпізнаний текст</h5>';
+    html += '<pre class="ls-ocr-text">' + (text || 'Текст не знайдено') + '</pre>';
+    html += '<div class="ls-ocr-conf">Точність: ' + confidence + '%</div>';
+    html += '</div>';
+
+    html += '</div>';
+
+    if (resultEl) resultEl.innerHTML = html;
+    if (status) status.innerHTML = '<span class="ls-scan-detected">✅ OCR: ' + text.length + ' символів, ' + dates.length + ' дат</span>';
+    App.toast('✅ Текст зчитано: ' + dates.length + ' дат знайдено', 'ok');
+  }
+
+  function useOCRDate(dateStr) {
+    // Try to use this date as expiry date for a new batch
+    const input = prompt('Додати партію з терміном ' + dateStr + '?\nВведіть назву продукту:');
+    if (!input) return;
+    const ProductCore = mod('ProductCore');
+    const products = ProductCore.getAll();
+    let product = products.find(function (p) { return p.name.toLowerCase().includes(input.toLowerCase()); });
+    if (!product) {
+      product = ProductCore.add({ name: input, categoryId: 'cat-food', unit: 'шт', minStock: 1 });
+    }
+    const BatchManager = mod('BatchManager');
+    BatchManager.add({ productId: product.id, quantity: 1, expiryDate: dateStr });
+    App.toast('📦 Партію додано: ' + input + ' до ' + dateStr, 'ok');
+    refreshAll();
   }
 
   let scanHistory = [];
@@ -251,6 +377,7 @@ const App = (function () {
   function toggleCamera() {
     const cam = mod('CameraAI');
     const btn = document.getElementById('lsCameraBtn');
+    const ocrBtn = document.getElementById('lsOcrBtn');
     const stopBtn = document.getElementById('lsStopBtn');
     const placeholder = document.getElementById('lsScanPlaceholder');
     const result = document.getElementById('lsScanResult');
@@ -259,11 +386,9 @@ const App = (function () {
 
     if (cam.isCameraActive()) {
       cam.stopLiveScan();
-      // Clean up: remove video, frame, pulse elements
-      if (viewport) {
-        viewport.querySelectorAll('video, .ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
-      }
+      if (viewport) viewport.querySelectorAll('video, .ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
       if (btn) btn.style.display = '';
+      if (ocrBtn) ocrBtn.style.display = 'none';
       if (stopBtn) stopBtn.style.display = 'none';
       if (placeholder) placeholder.style.display = '';
       if (result) result.style.display = 'none';
@@ -272,12 +397,10 @@ const App = (function () {
       return;
     }
 
-    // Hide placeholder, show loading
     if (placeholder) placeholder.style.display = 'none';
     if (result) result.style.display = 'none';
     if (status) status.innerHTML = '<span class="ls-scan-loading">🔄 Запуск камери...</span>';
 
-    // Add scanning frame overlay for visual guide
     if (viewport) {
       var frame = document.createElement('div');
       frame.className = 'ls-scan-frame';
@@ -287,22 +410,41 @@ const App = (function () {
       viewport.appendChild(pulse);
     }
 
+    if (scanMode === 'ocr') {
+      // OCR mode — camera only, no continuous scanning
+      cam.startLiveScan(
+        viewport, null,
+        (err) => {
+          if (viewport) viewport.querySelectorAll('.ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
+          if (status) status.innerHTML = '<span class="ls-scan-error">❌ ' + (err.message || 'Камера недоступна') + '</span>';
+          if (placeholder) placeholder.style.display = '';
+          App.toast('❌ Камера недоступна', 'error');
+        },
+        true // useOCR = true
+      ).then(() => {
+        if (cam.isCameraActive()) {
+          if (btn) btn.style.display = 'none';
+          if (ocrBtn) ocrBtn.style.display = '';
+          if (stopBtn) stopBtn.style.display = '';
+          if (status) status.innerHTML = '<span class="ls-scan-live">🔴 Камера активна — наведи на текст і тисни "Зчитати"</span>';
+        }
+      });
+      return;
+    }
+
+    // Barcode mode
     const engine = cam.hasNativeDetector() ? 'BarcodeDetector API' : 'QuaggaJS';
     console.log('[CameraAI] Scanning engine:', engine);
 
     cam.startLiveScan(
       viewport,
       (code) => {
-        // Barcode detected!
         if (status) status.innerHTML = '<span class="ls-scan-detected">✅ Знайдено: ' + code + '</span>';
         performScan(code);
-        // Stop camera after detection
         setTimeout(() => {
           if (cam.isCameraActive()) {
             cam.stopLiveScan();
-            if (viewport) {
-              viewport.querySelectorAll('video, .ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
-            }
+            if (viewport) viewport.querySelectorAll('video, .ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
             if (btn) btn.style.display = '';
             if (stopBtn) stopBtn.style.display = 'none';
             if (placeholder) placeholder.style.display = '';
@@ -310,9 +452,7 @@ const App = (function () {
         }, 2000);
       },
       (err) => {
-        if (viewport) {
-          viewport.querySelectorAll('.ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
-        }
+        if (viewport) viewport.querySelectorAll('.ls-scan-frame, .ls-scan-pulse').forEach(el => el.remove());
         if (status) status.innerHTML = '<span class="ls-scan-error">❌ Камера недоступна. ' + (err.message || 'Дозволи не надано') + '</span>';
         if (placeholder) placeholder.style.display = '';
         App.toast('❌ Камера недоступна. Дозволи не надано?', 'error');
@@ -711,7 +851,7 @@ const App = (function () {
   }
 
   return { init, addProduct, addProductWithBarcode, addBatch, addRecipe, addStorage,
-    doScan, randomScan, toggleCamera, toggleAI, markRead, markAllRead, clearAlerts, syncNow,
+    doScan, randomScan, toggleCamera, switchScanMode, runOCR, useOCRDate, toggleAI, markRead, markAllRead, clearAlerts, syncNow,
     switchUser, exportData, importData, resetData, toast };
 })();
 

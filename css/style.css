@@ -478,3 +478,23 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85rem}
 /* Scanning animation indicator */
 .ls-scan-pulse{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60%;height:3px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scan-pulse 2s ease-in-out infinite;z-index:5;box-shadow:0 0 8px var(--green)}
 @keyframes scan-pulse{0%,100%{top:25%}50%{top:75%}}
+
+/* ===== OCR MODE ===== */
+.ls-scan-mode-toggle{display:flex;gap:8px;margin-bottom:10px;width:100%;max-width:320px}
+.ls-mode-btn{flex:1;padding:10px 12px;border:2px solid #e0e0e0;background:#fff;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.ls-mode-btn.active{border-color:var(--green);background:rgba(46,204,113,.08);color:var(--green-d)}
+.ls-mode-btn:disabled{opacity:.4;cursor:not-allowed}
+.ls-mode-btn:hover:not(:disabled){border-color:var(--green)}
+.ls-btn-ocr{background:#2196f3}
+.ls-btn-ocr:hover{background:#1976d2}
+.ls-ocr-progress{display:flex;align-items:center;gap:10px;width:100%;max-width:300px;font-size:.82rem}
+.ls-ocr-bar{flex:1;height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.ls-ocr-fill{height:100%;background:linear-gradient(90deg,var(--green),#2196f3);transition:width .3s;border-radius:4px}
+.ls-ocr-result{padding:14px;background:#f8fef9;border:1px solid #e0f5e8;border-radius:10px;margin-top:10px;max-height:400px;overflow-y:auto}
+.ls-ocr-dates h5,.ls-ocr-text-section h5{font-size:.88rem;margin-bottom:8px;font-weight:700}
+.ls-ocr-date-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;background:#fff;border:1px solid #e8f5ee;border-radius:6px;margin-bottom:6px}
+.ls-ocr-date{font-size:1.1rem;font-weight:700;color:var(--green-d)}
+.ls-ocr-text{font-size:.82rem;white-space:pre-wrap;word-break:break-all;background:#fff;border:1px solid #eee;border-radius:6px;padding:10px;max-height:150px;overflow-y:auto;line-height:1.4}
+.ls-ocr-conf{font-size:.75rem;color:#999;margin-top:6px}
+.ls-ocr-expiry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.ls-ocr-tag{background:#fff3cd;padding:3px 8px;border-radius:4px;font-size:.78rem;color:#856404;border:1px solid #ffeaa7}
