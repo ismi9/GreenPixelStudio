@@ -220,23 +220,76 @@ LifeStock.register('GeminiAI', (function () {
   }  /**
    * Parse AI response for action JSON blocks and execute them
    */
+  /**
+   * Extract top-level {...} JSON objects from a string via brace-matching.
+   * Handles: single object, multiple objects concatenated with/without
+   * separators, objects wrapped in a [ ] array — all in one pass.
+   * This is needed because AI models sometimes put several JSON commands
+   * inside ONE ```json``` fence without valid separators, which breaks a
+   * naive JSON.parse() on the whole block.
+   */
+  function extractJsonObjects(str) {
+    var results = [];
+    var depth = 0, start = -1, inString = false, escape = false;
+    for (var i = 0; i < str.length; i++) {
+      var ch = str[i];
+      if (inString) {
+        if (escape) { escape = false; }
+        else if (ch === '\\') { escape = true; }
+        else if (ch === '"') { inString = false; }
+        continue;
+      }
+      if (ch === '"') { inString = true; continue; }
+      if (ch === '{') {
+        if (depth === 0) start = i;
+        depth++;
+      } else if (ch === '}') {
+        depth--;
+        if (depth === 0 && start !== -1) {
+          results.push(str.slice(start, i + 1));
+          start = -1;
+        }
+      }
+    }
+    return results;
+  }
+
   function executeActions(aiText) {
     lastActions = [];
     var actionBlocks = aiText.match(/```json\s*([\s\S]*?)```/g) || [];
-    if (actionBlocks.length === 0) return { executed: 0, results: [] };
+
+    // Fallback: some models omit the ```json fence entirely — scan raw text
+    // for objects containing an "action" key if no fenced blocks were found.
+    var rawObjectStrs = [];
+    if (actionBlocks.length === 0) {
+      rawObjectStrs = extractJsonObjects(aiText).filter(function (s) { return s.indexOf('"action"') !== -1; });
+      if (rawObjectStrs.length === 0) return { executed: 0, results: [] };
+    }
 
     var results = [];
-    actionBlocks.forEach(function (block) {
-      var jsonStr = block.replace(/```json\s*/, '').replace(/```/, '').trim();
+
+    function runObjectStr(objStr) {
       try {
-        var cmd = JSON.parse(jsonStr);
+        var cmd = JSON.parse(objStr);
         var result = executeAction(cmd);
         results.push(result);
         lastActions.push(result);
       } catch (e) {
         results.push({ action: 'parse_error', success: false, message: 'Помилка парсингу: ' + e.message });
       }
+    }
+
+    actionBlocks.forEach(function (block) {
+      var jsonStr = block.replace(/```json\s*/, '').replace(/```/, '').trim();
+      var objs = extractJsonObjects(jsonStr);
+      if (objs.length === 0) {
+        results.push({ action: 'parse_error', success: false, message: 'Не знайдено команд у блоці JSON' });
+        return;
+      }
+      objs.forEach(runObjectStr);
     });
+
+    rawObjectStrs.forEach(runObjectStr);
 
     return { executed: results.length, results: results };
   }
