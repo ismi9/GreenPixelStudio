@@ -76,43 +76,63 @@ LifeStock.register('GeminiAI', (function () {
    * Get inventory context for AI prompt
    */
   function getInventoryContext() {
-    const inv = LifeStock.get('InventoryEngine');
-    const products = LifeStock.get('ProductCore');
-    const batches = LifeStock.get('BatchManager');
-    const allProducts = products.getAll();
-    const stock = inv.getAllStock();
+    var inv = LifeStock.get('InventoryEngine');
+    var products = LifeStock.get('ProductCore');
+    var batchMgr = LifeStock.get('BatchManager');
+    if (!inv || !products) return 'Інвентар порожній.';
+
+    var allProducts = products.list();
+    var stock = inv.getAllStock();
+    var allBatches = batchMgr ? batchMgr.list({ status: 'active' }) : [];
 
     var ctx = '=== ІНВЕНТАР І ЗАПАСИ ===\n';
     ctx += 'Всього товарів: ' + allProducts.length + '\n\n';
 
     stock.forEach(function (item) {
-      var p = products.getById(item.productId);
-      if (!p) return;
-      ctx += '- ' + p.name;
-      if (p.manufacturer) ctx += ' (' + p.manufacturer + ')';
-      ctx += ': ' + item.quantity + ' ' + p.unit;
-      if (p.price) ctx += ', ціна: ' + p.price + ' ₴';
-      if (item.expiryDate) ctx += ', термін: ' + item.expiryDate;
-      if (item.daysUntilExpiry !== undefined) {
-        if (item.daysUntilExpiry < 0) ctx += ' [ПРОСТРОЧЕНО]';
-        else if (item.daysUntilExpiry <= 3) ctx += ' [СКОРО ПРОСТРОЧИТЬСЯ]';
-      }
+      // getAllStock already has name, icon, unit, stock, price
+      ctx += '- ' + (item.name || 'Невідомо');
+      if (item.manufacturer) ctx += ' (' + item.manufacturer + ')';
+      ctx += ': ' + (item.stock || 0) + ' ' + (item.unit || 'шт');
+      if (item.price) ctx += ', ціна: ' + item.price + ' ₴';
       ctx += '\n';
     });
 
-    // Low stock items
-    var lowStock = stock.filter(function (s) {
-      var p = products.getById(s.productId);
-      return p && s.quantity <= (p.minStock || 0);
-    });
+    // Expiry info from batches
+    if (allBatches.length > 0) {
+      var expiring = [];
+      var expired = [];
+      allBatches.forEach(function (b) {
+        if (!b.expiryDate) return;
+        var days = batchMgr.daysUntilExpiry(b.id);
+        if (days === null) return;
+        var p = products.get(b.productId);
+        var name = p ? p.name : 'Невідомо';
+        if (days < 0) {
+          expired.push('- ' + name + ': прострочено ' + b.expiryDate + ' (залишок: ' + (b.remaining || 0) + ')');
+        } else if (days <= 3) {
+          expiring.push('- ' + name + ': термін ' + b.expiryDate + ' (залишок: ' + (b.remaining || 0) + ', ' + days + ' дн)');
+        }
+      });
+      if (expired.length > 0) {
+        ctx += '\n=== ПРОСТРОЧЕНО ===\n';
+        ctx += expired.join('\n') + '\n';
+      }
+      if (expiring.length > 0) {
+        ctx += '\n=== СКОРО ПРОСТРОЧИТЬСЯ ===\n';
+        ctx += expiring.join('\n') + '\n';
+      }
+    }
+
+    // Low stock
+    var lowStock = stock.filter(function (s) { return s.low; });
     if (lowStock.length > 0) {
       ctx += '\n=== НИЗЬКИЙ ЗАПАС ===\n';
       lowStock.forEach(function (s) {
-        var p = products.getById(s.productId);
-        ctx += '- ' + p.name + ': ' + s.quantity + ' ' + p.unit + ' (мін: ' + p.minStock + ')\n';
+        ctx += '- ' + (s.name || '?') + ': ' + (s.stock || 0) + ' ' + (s.unit || 'шт') + ' (мін: ' + (s.minStock || 0) + ')\n';
       });
     }
 
+    if (allProducts.length === 0) ctx = 'Інвентар порожній. Товарів не додано.';
     return ctx;
   }
 

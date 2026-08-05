@@ -844,9 +844,15 @@ const App = (function () {
       aiChatMessages.pop(); // remove loading
       if (result.error) {
         aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
-      } else {
+      } else if (result.text) {
         aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+      } else {
+        aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь від AI' });
       }
+      renderAI();
+    }).catch(function (err) {
+      aiChatMessages.pop();
+      aiChatMessages.push({ role: 'model', text: '❌ Помилка: ' + escapeHtml(err.message || err) });
       renderAI();
     });
   }
@@ -878,9 +884,15 @@ const App = (function () {
       aiChatMessages.pop();
       if (result.error) {
         aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
-      } else {
+      } else if (result.text) {
         aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+      } else {
+        aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь від AI' });
       }
+      renderAI();
+    }).catch(function (err) {
+      aiChatMessages.pop();
+      aiChatMessages.push({ role: 'model', text: '❌ Помилка: ' + escapeHtml(err.message || err) });
       renderAI();
     });
   }
@@ -908,9 +920,15 @@ const App = (function () {
           aiChatMessages.pop();
           if (result.error) {
             aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
-          } else {
+          } else if (result.text) {
             aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+          } else {
+            aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь від AI' });
           }
+          renderAI();
+        }).catch(function (err) {
+          aiChatMessages.pop();
+          aiChatMessages.push({ role: 'model', text: '❌ Помилка: ' + escapeHtml(err.message || err) });
           renderAI();
         });
       };
