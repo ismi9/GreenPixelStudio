@@ -49,6 +49,16 @@ LifeStock.register('BatchManager', (function () {
   function get(id) { return batches.find(x => x.id === id) || null; }
   function remove(id) { batches = batches.filter(x => x.id !== id); save(); }
 
+  function setRemaining(id, remaining) {
+    const b = batches.find(x => x.id === id);
+    if (!b) return null;
+    b.remaining = Math.max(0, remaining);
+    b.status = b.remaining <= 0 ? 'depleted' : 'active';
+    save();
+    LifeStock.emit('batch:updated', b);
+    return b;
+  }
+
   function daysUntilExpiry(batchId) {
     const b = get(batchId);
     if (!b || !b.expiryDate) return null;
@@ -63,5 +73,5 @@ LifeStock.register('BatchManager', (function () {
     });
   }
 
-  return { add, writeOff, list, get, remove, daysUntilExpiry, getExpiring };
+  return { add, writeOff, setRemaining, list, get, remove, daysUntilExpiry, getExpiring };
 })());

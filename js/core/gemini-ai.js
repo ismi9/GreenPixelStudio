@@ -133,6 +133,7 @@ LifeStock.register('GeminiAI', (function () {
 
     var allProducts = products.list();
     var stock = inv.getAllStock();
+    var cats = products.getCategories();
     var allBatches = batchMgr ? batchMgr.list({ status: 'active' }) : [];
 
     var ctx = '=== ІНВЕНТАР І ЗАПАСИ ===\n';
@@ -140,16 +141,26 @@ LifeStock.register('GeminiAI', (function () {
 
     allProducts.forEach(function (prod) {
       var s = stock.find(function (st) { return st.productId === prod.id; });
+      var cat = cats.find(function (c) { return c.id === prod.categoryId; });
       ctx += '[ID:' + prod.id + '] ' + (prod.name || 'Невідомо');
       if (prod.manufacturer) ctx += ' (' + prod.manufacturer + ')';
       ctx += ': ' + (s ? s.stock : 0) + ' ' + (prod.unit || 'шт');
       if (prod.price) ctx += ', ціна: ' + prod.price + ' грн';
-      if (prod.category) ctx += ', кат: ' + prod.category;
+      if (cat) ctx += ', кат: ' + cat.name;
       if (s && s.low) ctx += ' ⚠️ НИЗЬКИЙ ЗАПАС';
       ctx += '\n';
     });
 
     if (allBatches.length > 0) {
+      ctx += '\n=== АКТИВНІ ПАРТІЇ ===\n';
+      allBatches.forEach(function (b) {
+        var p = products.get(b.productId);
+        var days = b.expiryDate ? batchMgr.daysUntilExpiry(b.id) : null;
+        ctx += '[BID:' + b.id + '] ' + (p ? p.name : 'Невідомо') + ': залишок ' + (b.remaining || 0);
+        if (b.expiryDate) ctx += ', термін: ' + b.expiryDate + (days !== null ? ' (' + days + ' дн)' : '');
+        ctx += '\n';
+      });
+
       var expiring = [], expired = [];
       allBatches.forEach(function (b) {
         if (!b.expiryDate) return;
@@ -174,44 +185,39 @@ LifeStock.register('GeminiAI', (function () {
 
     if (allProducts.length === 0) ctx = 'Інвентар порожній. Товарів не додано.';
     return ctx;
-  }
-
-  /**
+  }  /**
    * System prompt with ACTION capabilities
    */
   function getActionSystemPrompt() {
     return 'Ти асистент для управління запасами LifeStock. Відповідай українською, коротко і чітко.\n\n' +
       'ТИ МОЖЕШ ВИКОНУВАТИ ДІЇ з інвентарем! Коли користувач просить щось змінити — додати, видалити, оновити — ' +
       'встав команду у форматі JSON у окремому блоці коду ```json ... ```.\n\n' +
-      'ДОСТУПНІ КОМАНДИ:\n\n' +
-      '1. Додати товар:\n' +
-      '```json\n{"action":"add_product","name":"Кава Lavazza","category":"Напої","unit":"шт","price":120,"manufacturer":"Lavazza"}\n```\n\n' +
-      '2. Видалити товар (потрібен ID):\n' +
-      '```json\n{"action":"delete_product","productId":"123"}\n```\n\n' +
+      'ДОСТУПНІ КОМАНДИ (точні назви полів!):\n\n' +
+      '1. Додати товар (categoryName — назва категорії, буде створена якщо немає):\n' +
+      '```json\n{"action":"add_product","name":"Кава Lavazza","categoryName":"Напої","unit":"шт","price":120,"manufacturer":"Lavazza","minStock":2,"quantity":5,"expiryDate":"2026-12-31"}\n```\n' +
+      '(quantity і expiryDate — опційно, одразу створює першу партію)\n\n' +
+      '2. Видалити товар (потрібен реальний ID з контексту):\n' +
+      '```json\n{"action":"delete_product","productId":"p-xxx"}\n```\n\n' +
       '3. Оновити ціну товару:\n' +
-      '```json\n{"action":"update_price","productId":"123","price":150}\n```\n\n' +
-      '4. Додати партію (termін придатності):\n' +
-      '```json\n{"action":"add_batch","productId":"123","batchNumber":"L-2026-001","expiryDate":"2026-12-31","remaining":10}\n```\n\n' +
-      '5. Оновити залишок партії:\n' +
-      '```json\n{"action":"update_batch_remaining","batchId":"456","remaining":5}\n```\n\n' +
-      '6. Встановити мінімальний запас:\n' +
-      '```json\n{"action":"set_min_stock","productId":"123","minStock":3}\n```\n\n' +
+      '```json\n{"action":"update_price","productId":"p-xxx","price":150}\n```\n\n' +
+      '4. Додати партію (quantity — кількість, не remaining):\n' +
+      '```json\n{"action":"add_batch","productId":"p-xxx","batchNumber":"L-2026-001","expiryDate":"2026-12-31","quantity":10}\n```\n\n' +
+      '5. Оновити залишок партії (потрібен реальний batchId з контексту):\n' +
+      '```json\n{"action":"update_batch_remaining","batchId":"b-xxx","remaining":5}\n```\n\n' +
+      '6. Встановити мінімальний запас товару:\n' +
+      '```json\n{"action":"set_min_stock","productId":"p-xxx","minStock":3}\n```\n\n' +
       '7. Додати локацію зберігання:\n' +
-      '```json\n{"action":"add_storage","name":"Морозильник","type":"freezer","temperature":"-18"}\n```\n\n' +
-      '8. Додати рецепт:\n' +
-      '```json\n{"action":"add_recipe","name":"Омлет","ingredients":[{"name":"Яйце","qty":3},{"name":"Молоко","qty":100}],"steps":["Збий яйця","Додай молоко","Обсмаж"]}\n```\n\n' +
+      '```json\n{"action":"add_storage","name":"Морозильник 2","temperature":-18}\n```\n\n' +
+      '8. Додати рецепт (ingredients: [{"name":"Яйце","quantity":3,"unit":"шт"}]):\n' +
+      '```json\n{"action":"add_recipe","name":"Омлет","portions":2,"ingredients":[{"name":"Яйце","quantity":3,"unit":"шт"},{"name":"Молоко","quantity":100,"unit":"мл"}],"instructions":"Збий яйця, додай молоко, обсмаж."}\n```\n\n' +
       'ПРАВИЛА:\n' +
-      '- Завжди показуй ID товарів у контексті (ID:xxx), щоб користувач міг посилатися на них\n' +
-      '- Перед дією коротко підтвердь що збираєшся зробити\n' +
-      '- Після команди JSON додай коротке пояснення українською\n' +
-      '- Можна виконати кілька команд одразу — кожна в окремому блоці ```json\n' +
+      '- У контексті інвентарю показані реальні productId (ID:xxx) і batchId (BID:xxx) — використовуй ТІЛЬКИ їх, ніколи не вигадуй нові\n' +
       '- Якщо не знаєш ID — спитай користувача або знайди товар за назвою у контексті\n' +
-      '- НЕ вигадуй ID — використовуй тільки реальні з контексту інвентарю\n' +
+      '- Перед дією коротко підтвердь що збираєшся зробити, після — коротке пояснення українською\n' +
+      '- Можна виконати кілька команд одразу — кожна в окремому блоці ```json\n' +
       '- Дати у форматі YYYY-MM-DD\n\n' +
       'Поточні дані інвентарю:\n' + getInventoryContext();
-  }
-
-  /**
+  }  /**
    * Parse AI response for action JSON blocks and execute them
    */
   function executeActions(aiText) {
@@ -245,93 +251,127 @@ LifeStock.register('GeminiAI', (function () {
 
     var products = LifeStock.get('ProductCore');
     var batchMgr = LifeStock.get('BatchManager');
-    var inv = LifeStock.get('InventoryEngine');
     var storage = LifeStock.get('StorageManager');
-    var recipe = LifeStock.get('RecipeEngine');
+    var recipeEngine = LifeStock.get('RecipeEngine');
+
+    function resolveCategoryId(categoryName) {
+      if (!categoryName) return 'cat-other';
+      var cats = products.getCategories();
+      var match = cats.find(function (c) { return c.name.toLowerCase() === String(categoryName).toLowerCase(); });
+      if (match) return match.id;
+      var created = products.addCategory(categoryName);
+      return created.id;
+    }
 
     switch (cmd.action) {
-      case 'add_product':
+      case 'add_product': {
         if (!products) return { action: cmd.action, success: false, message: 'Модуль ProductCore не завантажено' };
         if (!cmd.name) return { action: cmd.action, success: false, message: 'Не вказано назву товару' };
-        var newProd = products.create({
+        var categoryId = resolveCategoryId(cmd.categoryName || cmd.category);
+        var newProd = products.add({
           name: cmd.name,
-          category: cmd.category || 'Інше',
+          categoryId: categoryId,
           unit: cmd.unit || 'шт',
           price: cmd.price || 0,
+          minStock: cmd.minStock || 0,
           manufacturer: cmd.manufacturer || '',
         });
-        // If quantity specified, add a batch
-        if (cmd.quantity && cmd.quantity > 0 && batchMgr) {
-          batchMgr.createBatch(newProd.id, {
-            batchNumber: 'AI-' + Date.now(),
+        var msg = 'Товар "' + cmd.name + '" додано (ID: ' + newProd.id + ')';
+        var qty = cmd.quantity || cmd.remaining || 0;
+        if (qty > 0 && batchMgr) {
+          batchMgr.add({
+            productId: newProd.id,
+            quantity: qty,
             expiryDate: cmd.expiryDate || null,
-            remaining: cmd.quantity,
+            batchNumber: 'AI-' + Date.now(),
           });
+          msg += ', партія: ' + qty + ' ' + (cmd.unit || 'шт');
+          if (cmd.expiryDate) msg += ', термін: ' + cmd.expiryDate;
         }
-        return { action: cmd.action, success: true, message: 'Товар "' + cmd.name + '" додано (ID: ' + newProd.id + ')', productId: newProd.id };
+        return { action: cmd.action, success: true, message: msg, productId: newProd.id };
+      }
 
-      case 'delete_product':
+      case 'delete_product': {
         if (!products) return { action: cmd.action, success: false, message: 'Модуль не завантажено' };
         if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
-        var prod = products.get(cmd.productId);
-        if (!prod) return { action: cmd.action, success: false, message: 'Товар ID:' + cmd.productId + ' не знайдено' };
-        products.delete(cmd.productId);
-        return { action: cmd.action, success: true, message: 'Товар "' + (prod.name || cmd.productId) + '" видалено' };
+        var prodToDelete = products.get(cmd.productId);
+        if (!prodToDelete) return { action: cmd.action, success: false, message: 'Товар ID:' + cmd.productId + ' не знайдено' };
+        products.remove(cmd.productId);
+        return { action: cmd.action, success: true, message: 'Товар "' + (prodToDelete.name || cmd.productId) + '" видалено' };
+      }
 
-      case 'update_price':
+      case 'update_price': {
         if (!products) return { action: cmd.action, success: false, message: 'Модуль не завантажено' };
         if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
         var pProd = products.get(cmd.productId);
-        if (!pProd) return { action: cmd.action, success: false, message: 'Товар не знайдено' };
+        if (!pProd) return { action: cmd.action, success: false, message: 'Товар ID:' + cmd.productId + ' не знайдено' };
         products.update(cmd.productId, { price: cmd.price });
         return { action: cmd.action, success: true, message: 'Ціну "' + (pProd.name || '') + '" змінено на ' + cmd.price + ' грн' };
+      }
 
-      case 'add_batch':
+      case 'add_batch': {
         if (!batchMgr) return { action: cmd.action, success: false, message: 'Модуль BatchManager не завантажено' };
         if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
         var bProd = products ? products.get(cmd.productId) : null;
         if (!bProd) return { action: cmd.action, success: false, message: 'Товар ID:' + cmd.productId + ' не знайдено' };
-        var newBatch = batchMgr.createBatch(cmd.productId, {
+        var qtyToAdd = cmd.quantity || cmd.remaining || 0;
+        var newBatch = batchMgr.add({
+          productId: cmd.productId,
+          quantity: qtyToAdd,
           batchNumber: cmd.batchNumber || 'AI-' + Date.now(),
           expiryDate: cmd.expiryDate || null,
-          remaining: cmd.remaining || 0,
         });
-        return { action: cmd.action, success: true, message: 'Партію додано до "' + bProd.name + '" (залишок: ' + (cmd.remaining || 0) + ', термін: ' + (cmd.expiryDate || '—') + ')' };
+        return { action: cmd.action, success: true, message: 'Партію додано до "' + bProd.name + '" (' + qtyToAdd + ' ' + (bProd.unit || 'шт') + ', термін: ' + (cmd.expiryDate || '—') + ')', batchId: newBatch.id };
+      }
 
-      case 'update_batch_remaining':
+      case 'update_batch_remaining': {
         if (!batchMgr) return { action: cmd.action, success: false, message: 'Модуль не завантажено' };
         if (!cmd.batchId) return { action: cmd.action, success: false, message: 'Не вказано ID партії' };
-        batchMgr.updateRemaining(cmd.batchId, cmd.remaining);
-        return { action: cmd.action, success: true, message: 'Залишок партії ' + cmd.batchId + ' змінено на ' + cmd.remaining };
+        var existingBatch = batchMgr.get(cmd.batchId);
+        if (!existingBatch) return { action: cmd.action, success: false, message: 'Партію ID:' + cmd.batchId + ' не знайдено' };
+        batchMgr.setRemaining(cmd.batchId, cmd.remaining);
+        var bp = products ? products.get(existingBatch.productId) : null;
+        return { action: cmd.action, success: true, message: 'Залишок "' + (bp ? bp.name : cmd.batchId) + '" змінено на ' + cmd.remaining };
+      }
 
-      case 'set_min_stock':
-        if (!inv) return { action: cmd.action, success: false, message: 'Модуль Inventory не завантажено' };
+      case 'set_min_stock': {
+        if (!products) return { action: cmd.action, success: false, message: 'Модуль не завантажено' };
         if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
-        inv.setMinStock(cmd.productId, cmd.minStock);
-        return { action: cmd.action, success: true, message: 'Мін. запас встановлено: ' + cmd.minStock };
+        var msProd = products.get(cmd.productId);
+        if (!msProd) return { action: cmd.action, success: false, message: 'Товар ID:' + cmd.productId + ' не знайдено' };
+        products.update(cmd.productId, { minStock: cmd.minStock });
+        return { action: cmd.action, success: true, message: 'Мін. запас "' + msProd.name + '" встановлено: ' + cmd.minStock };
+      }
 
-      case 'add_storage':
+      case 'add_storage': {
         if (!storage) return { action: cmd.action, success: false, message: 'Модуль Storage не завантажено' };
-        var newLoc = storage.createLocation({
+        var newLoc = storage.add({
           name: cmd.name || 'Нова локація',
-          type: cmd.type || 'room',
-          temperature: cmd.temperature || '',
+          temp: cmd.temperature !== undefined ? cmd.temperature : (cmd.temp !== undefined ? cmd.temp : null),
         });
-        return { action: cmd.action, success: true, message: 'Локацію "' + (cmd.name || '') + '" додано' };
+        return { action: cmd.action, success: true, message: 'Локацію "' + (cmd.name || '') + '" додано (ID: ' + newLoc.id + ')' };
+      }
 
-      case 'add_recipe':
-        if (!recipe) return { action: cmd.action, success: false, message: 'Модуль Recipe не завантажено' };
-        var newRec = recipe.create({
-          name: cmd.name || 'Новий рецепт',
-          ingredients: cmd.ingredients || [],
-          steps: cmd.steps || [],
+      case 'add_recipe': {
+        if (!recipeEngine) return { action: cmd.action, success: false, message: 'Модуль Recipe не завантажено' };
+        var ingredients = (cmd.ingredients || []).map(function (i) {
+          return { name: i.name || '', quantity: i.quantity || i.qty || 0, unit: i.unit || '' };
         });
-        return { action: cmd.action, success: true, message: 'Рецепт "' + (cmd.name || '') + '" додано' };
+        var instructions = cmd.instructions || (Array.isArray(cmd.steps) ? cmd.steps.join('. ') : '');
+        var newRec = recipeEngine.add({
+          name: cmd.name || 'Новий рецепт',
+          portions: cmd.portions || 2,
+          ingredients: ingredients,
+          instructions: instructions,
+        });
+        return { action: cmd.action, success: true, message: 'Рецепт "' + (cmd.name || '') + '" додано (ID: ' + newRec.id + ')' };
+      }
 
       default:
         return { action: cmd.action || 'unknown', success: false, message: 'Невідома дія: ' + (cmd.action || '?') };
     }
   }
+
 
   /**
    * Core API call — OpenAI-compatible chat completions
