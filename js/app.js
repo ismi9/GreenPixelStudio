@@ -697,11 +697,15 @@ const App = (function () {
     const enabled = ai.isEnabled();
     const hasKey = ai.hasKey();
     const consent = ai.hasConsent();
+    const providers = ai.getProviders();
+    const currentProvider = ai.getProvider();
+    const currentModel = ai.getModel();
+    const providerInfo = ai.getProviderInfo();
 
     document.getElementById('panel-ai').innerHTML = `
       <div class="ls-ai-container">
         <div class="ls-ai-header">
-          <h3>🤖 AI-асистент (Gemini Flash)</h3>
+          <h3>🤖 AI-асистент</h3>
           <div class="ls-ai-status ${enabled ? 'active' : 'inactive'}">
             ${enabled ? '✅ Активовано' : '❌ Не активовано'}
           </div>
@@ -710,16 +714,32 @@ const App = (function () {
         ${!hasKey ? `
           <div class="ls-ai-setup">
             <h4>🔑 Підключення AI</h4>
-            <p>AI працює на основі Google Gemini 2.0 Flash. Безкоштовний тариф доступний.</p>
-            <ol class="ls-ai-steps">
-              <li>Відкрий <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
-              <li>Створи API ключ (безкоштовно)</li>
-              <li>Встав ключ нижче</li>
-            </ol>
-            <input type="password" class="ls-input ls-ai-key-input" id="lsApiKey" placeholder="Встав Gemini API ключ..." />
+            <p>Оберіть провайдера та вставте API ключ. Усі провайдери мають безкоштовний тариф.</p>
+
+            <div class="ls-ai-providers">
+              ${providers.map(p => `
+                <button class="ls-ai-provider-btn ${p.id === currentProvider ? 'active' : ''}" onclick="App.selectProvider('${p.id}')">
+                  ${p.id === 'groq' ? '⚡' : p.id === 'openrouter' ? '🌐' : '♊'} ${p.name}
+                  ${p.vision ? '<span class="ls-ai-vis">📸</span>' : ''}
+                </button>
+              `).join('')}
+            </div>
+
+            ${providerInfo ? `
+              <p class="ls-ai-provider-hint">
+                Ключ для <b>${providerInfo.name}</b>:
+                <a href="${providerInfo.keyUrl}" target="_blank">${providerInfo.keyUrl}</a>
+              </p>
+
+              <select class="ls-input ls-ai-model-select" id="lsAiModel" onchange="App.selectModel(this.value)">
+                ${providerInfo.models.map(m => `<option value="${m.id}" ${m.id === currentModel ? 'selected' : ''}>${m.label}</option>`).join('')}
+              </select>
+            ` : ''}
+
+            <input type="password" class="ls-input ls-ai-key-input" id="lsApiKey" placeholder="Встав API ключ..." />
             <label class="ls-ai-consent">
-              <input type="checkbox" id="lsAiConsent" onchange="App.updateAiConsent(this.checked)">
-              <span>Я даю згоду на обробку даних через Google Gemini. AI працює лише за моєю згодою.</span>
+              <input type="checkbox" id="lsAiConsent">
+              <span>Я даю згоду на обробку даних через AI. Дані інвентарю передаються до обраного провайдера лише при запиті.</span>
             </label>
             <button class="ls-btn-primary" onclick="App.connectAI()">🔌 Підключити AI</button>
           </div>
@@ -727,10 +747,10 @@ const App = (function () {
 
         ${hasKey && !consent ? `
           <div class="ls-ai-consent-box">
-            <p>🔑 API ключ збережено (***${ai.hasKey() ? '****' : ''}). Для активації потрібна згода.</p>
+            <p>🔑 API ключ збережено (${providerInfo ? providerInfo.name : '?'}). Для активації потрібна згода.</p>
             <label class="ls-ai-consent">
               <input type="checkbox" id="lsAiConsent2" onchange="App.updateAiConsent(this.checked)">
-              <span>Я даю згоду на обробку даних через Google Gemini.</span>
+              <span>Я даю згоду на обробку даних через AI.</span>
             </label>
             <button class="ls-btn-danger ls-btn-sm" onclick="App.disconnectAI()">🗑️ Видалити ключ</button>
           </div>
@@ -738,12 +758,19 @@ const App = (function () {
 
         ${enabled ? `
           <div class="ls-ai-active">
+            <div class="ls-ai-provider-bar">
+              <span class="ls-ai-current-provider">
+                ${providerInfo ? (providerInfo.name + ' · ' + (currentModel || providerInfo.defaultModel)) : ''}
+              </span>
+              <button class="ls-btn-ghost ls-btn-sm" onclick="App.aiSettings()">⚙️ Змінити</button>
+            </div>
+
             <div class="ls-ai-features">
               <button class="ls-ai-feature-btn" onclick="App.aiAction('recipes')">🍳 Рецепти</button>
               <button class="ls-ai-feature-btn" onclick="App.aiAction('analyze')">📊 Аналіз залишків</button>
               <button class="ls-ai-feature-btn" onclick="App.aiAction('forecast')">🔮 Прогноз закупівель</button>
               <button class="ls-ai-feature-btn" onclick="App.aiAction('shopping')">🛒 Список покупок</button>
-              <button class="ls-ai-feature-btn" onclick="App.aiPhotoAnalyze()">📸 Аналіз фото</button>
+              ${providerInfo && providerInfo.vision ? '<button class="ls-ai-feature-btn" onclick="App.aiPhotoAnalyze()">📸 Аналіз фото</button>' : ''}
             </div>
 
             <div class="ls-ai-chat" id="lsAiChat">
@@ -769,9 +796,28 @@ const App = (function () {
         ` : ''}
       </div>
     `;
-    // Scroll chat to bottom
     var chatEl = document.getElementById('lsAiChat');
     if (chatEl) chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function selectProvider(p) {
+    const ai = mod('GeminiAI');
+    ai.setProvider(p);
+    ai.clearHistory();
+    aiChatMessages = [];
+    renderAI();
+  }
+
+  function selectModel(m) {
+    mod('GeminiAI').setModel(m);
+  }
+
+  function aiSettings() {
+    // Disconnect to show setup screen
+    const ai = mod('GeminiAI');
+    ai.setConsent(false);
+    aiChatMessages = [];
+    renderAI();
   }
 
   function updateAiConsent(checked) {
@@ -779,37 +825,31 @@ const App = (function () {
     ai.setConsent(checked);
     if (checked) {
       App.toast('✅ Згоду надано', 'ok');
-      // Only re-render if key already saved (switching to active state)
-      // If still on setup screen (key not saved yet), DON'T re-render — it would wipe the input
-      if (ai.hasKey() && ai.isEnabled()) {
-        renderAI();
-      }
+      if (ai.hasKey() && ai.isEnabled()) renderAI();
     } else {
-      if (ai.hasKey()) {
-        renderAI();
-      }
+      if (ai.hasKey()) renderAI();
     }
   }
 
   function connectAI() {
-    // Read values from DOM FIRST, before any state changes
     const keyInput = document.getElementById('lsApiKey');
     const consentEl = document.getElementById('lsAiConsent');
     const key = keyInput ? keyInput.value.trim() : '';
     const consent = consentEl ? consentEl.checked : false;
 
     if (!key) { App.toast('⚠️ Введіть API ключ', 'warn'); return; }
-    if (!consent) { App.toast('⚠️ Поставте галочку згоди на обробку даних', 'warn'); return; }
+    if (!consent) { App.toast('⚠️ Поставте галочку згоди', 'warn'); return; }
 
     const ai = mod('GeminiAI');
     ai.setApiKey(key);
     ai.setConsent(true);
 
     if (ai.isEnabled()) {
-      App.toast('✅ AI підключено: Gemini Flash', 'ok');
+      const info = ai.getProviderInfo();
+      App.toast('✅ AI підключено: ' + (info ? info.name : ''), 'ok');
       renderAI();
     } else {
-      App.toast('❌ Помилка активації. Перевірте ключ.', 'error');
+      App.toast('❌ Помилка активації', 'error');
     }
   }
 
@@ -836,19 +876,14 @@ const App = (function () {
     aiChatMessages.push({ role: 'user', text: escapeHtml(text) });
     renderAI();
 
-    // Show loading
     aiChatMessages.push({ role: 'model', text: '<i>обмірковую...</i>' });
     renderAI();
 
     ai.askQuestion(text).then(function (result) {
-      aiChatMessages.pop(); // remove loading
-      if (result.error) {
-        aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
-      } else if (result.text) {
-        aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
-      } else {
-        aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь від AI' });
-      }
+      aiChatMessages.pop();
+      if (result.error) aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
+      else if (result.text) aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+      else aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь' });
       renderAI();
     }).catch(function (err) {
       aiChatMessages.pop();
@@ -882,13 +917,9 @@ const App = (function () {
 
     promise.then(function (result) {
       aiChatMessages.pop();
-      if (result.error) {
-        aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
-      } else if (result.text) {
-        aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
-      } else {
-        aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь від AI' });
-      }
+      if (result.error) aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
+      else if (result.text) aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+      else aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь' });
       renderAI();
     }).catch(function (err) {
       aiChatMessages.pop();
@@ -901,7 +932,6 @@ const App = (function () {
     const ai = mod('GeminiAI');
     if (!ai.isEnabled()) { App.toast('⚠️ AI не активовано', 'warn'); return; }
 
-    // Trigger file input
     var input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -918,13 +948,9 @@ const App = (function () {
 
         ai.analyzePhoto(base64).then(function (result) {
           aiChatMessages.pop();
-          if (result.error) {
-            aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
-          } else if (result.text) {
-            aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
-          } else {
-            aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь від AI' });
-          }
+          if (result.error) aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
+          else if (result.text) aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+          else aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь' });
           renderAI();
         }).catch(function (err) {
           aiChatMessages.pop();
@@ -951,7 +977,6 @@ const App = (function () {
 
   function formatAiText(text) {
     if (!text) return '';
-    // Basic formatting: **bold** → <b>, * item → list, line breaks
     var html = escapeHtml(text);
     html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
     html = html.replace(/^\* (.+)$/gm, '<div class="ls-ai-li">• $1</div>');
@@ -959,6 +984,7 @@ const App = (function () {
     html = html.replace(/\n/g, '<br>');
     return html;
   }
+
 
   function renderSettings() {
     const sync = mod('SyncManager').getStatus();
@@ -1166,7 +1192,7 @@ const App = (function () {
   }
 
   return { init, addProduct, addProductWithBarcode, addBatch, addRecipe, addStorage,
-    doScan, randomScan, toggleCamera, switchScanMode, runOCR, useOCRDate, toggleAI, markRead, markAllRead, clearAlerts, syncNow, renderAI, connectAI, disconnectAI, updateAiConsent, aiSend, aiAction, aiPhotoAnalyze, aiClearChat,
+    doScan, randomScan, toggleCamera, switchScanMode, runOCR, useOCRDate, toggleAI, markRead, markAllRead, clearAlerts, syncNow, renderAI, connectAI, disconnectAI, updateAiConsent, aiSend, aiAction, aiPhotoAnalyze, aiClearChat, selectProvider, selectModel, aiSettings,
     switchUser, exportData, importData, resetData, toast };
 })();
 

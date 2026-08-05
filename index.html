@@ -208,58 +208,72 @@
     </div>
 </section>
 
-<!-- ===== AI PLATFORM (GEMINI FLASH) ===== -->
+<!-- ===== AI PLATFORM (MULTI-PROVIDER) ===== -->
 <section id="ai" class="ai-section">
     <div class="container">
         <div class="section-head">
-            <span class="section-tag">AI-платформа · Google Gemini 2.0 Flash</span>
+            <span class="section-tag">AI-платформа · Multi-Provider</span>
             <h2>ШІ — окремий сервіс за дозволом користувача</h2>
-            <p class="section-sub">AI на основі Google Gemini Flash. Працює лише за згодою. Без AI платформа функціонує повноцінно.</p>
+            <p class="section-sub">Підтримка кількох AI-провайдерів. Працює лише за згодою. Без AI платформа функціонує повноцінно.</p>
+        </div>
+        <div class="ai-providers-row">
+            <div class="ai-provider-card">
+                <span class="ai-provider-icon">⚡</span>
+                <h4>Groq</h4>
+                <p>Найшвидший інференс. Llama 3.3 70B. Безкоштовно: 30 запитів/хв.</p>
+                <div class="ai-badge">Free · Fast</div>
+            </div>
+            <div class="ai-provider-card">
+                <span class="ai-provider-icon">🌐</span>
+                <h4>OpenRouter</h4>
+                <p>Агрегатор моделей. Gemma 4, Nemotron, GPT-OSS. Безкоштовні моделі + Vision.</p>
+                <div class="ai-badge">Free · Vision</div>
+            </div>
+            <div class="ai-provider-card">
+                <span class="ai-provider-icon">♊</span>
+                <h4>Google Gemini</h4>
+                <p>Gemini 2.0 Flash від Google. Безкоштовний тариф: 15 запитів/хв.</p>
+                <div class="ai-badge">Free · Vision</div>
+            </div>
         </div>
         <div class="ai-grid">
             <div class="ai-card">
                 <span class="ai-icon">💬</span>
                 <h4>Запити до бази</h4>
-                <p>"Скільки кави залишилось?" — відповіді природною мовою на основі вашого інвентарю. Gemini Flash аналізує вашу базу.</p>
-                <div class="ai-badge">Gemini Flash</div>
+                <p>"Скільки кави залишилось?" — відповіді природною мовою на основі вашого інвентарю.</p>
             </div>
             <div class="ai-card">
                 <span class="ai-icon">🍳</span>
                 <h4>Підбір рецептів</h4>
-                <p>Рецепти на основі наявних залишків. "Що приготувати з того, що є?" — Gemini генерує варіанти.</p>
-                <div class="ai-badge">Gemini Flash</div>
+                <p>Рецепти на основі наявних залишків. "Що приготувати з того, що є?"</p>
             </div>
             <div class="ai-card">
                 <span class="ai-icon">📸</span>
                 <h4>Аналіз фото</h4>
-                <p>Розпізнавання товарів за фотографією полиці, підрахунок кількості через Gemini Vision API.</p>
-                <div class="ai-badge">Gemini Vision</div>
+                <p>Розпізнавання товарів за фотографією полиці, підрахунок кількості (OpenRouter/Gemini).</p>
             </div>
             <div class="ai-card">
                 <span class="ai-icon">📊</span>
                 <h4>Аналіз залишків</h4>
-                <p>Виявлення надлишків, дефіциту, оптимізація розміщення товарів на основі даних інвентарю.</p>
-                <div class="ai-badge">Gemini Flash</div>
+                <p>Виявлення надлишків, дефіциту, оптимізація розміщення товарів.</p>
             </div>
             <div class="ai-card">
                 <span class="ai-icon">🔮</span>
                 <h4>Прогноз закупівель</h4>
-                <p>Прогноз попиту на основі поточних залишків, пріоритети закупівлі, орієнтовна вартість.</p>
-                <div class="ai-badge">Gemini Flash</div>
+                <p>Прогноз попиту на основі поточних залишків, пріоритети закупівлі.</p>
             </div>
             <div class="ai-card">
                 <span class="ai-icon">🛒</span>
                 <h4>Смарт-список покупок</h4>
-                <p>Автоматична генерація списку покупок: що закінчується, скільки купити, орієнтовний бюджет.</p>
-                <div class="ai-badge">Gemini Flash</div>
+                <p>Автоматична генерація списку покупок: що закінчується, скільки купити.</p>
             </div>
         </div>
         <div class="ai-tech-info">
             <div class="ai-tech-item">
-                <span class="ai-tech-icon">⚡</span>
+                <span class="ai-tech-icon">🔀</span>
                 <div>
-                    <h5>Gemini 2.0 Flash</h5>
-                    <p>Швидка модель від Google. Безкоштовний тариф: 15 запитів/хв, 1500/день.</p>
+                    <h5>3 провайдери на вибір</h5>
+                    <p>Groq (швидкий), OpenRouter (безкоштовні моделі + vision), Gemini (Google). Перемикання в один клік.</p>
                 </div>
             </div>
             <div class="ai-tech-item">
@@ -279,7 +293,7 @@
         </div>
         <div class="ai-note">
             <span>🔒</span>
-            <p>ШІ активується тільки за добровільною згодою користувача. API ключ зберігається локально. Дані інвентарю передаються до Google Gemini лише при запиті. Вимкнення AI не впливає на жодну функцію платформи.</p>
+            <p>ШІ активується тільки за добровільною згодою користувача. API ключ зберігається локально. Дані інвентарю передаються до обраного AI-провайдера лише при запиті. Вимкнення AI не впливає на жодну функцію платформи.</p>
         </div>
     </div>
 </section>
