@@ -1,6 +1,6 @@
 /**
- * [11] AI Core — Multi-provider AI integration
- * Stable since v3.8
+ * [11] AI Core — Multi-provider AI integration with ACTION EXECUTION
+ * Stable since v3.9
  * NOTE: AI is OPTIONAL. Core platform works fully without this module.
  * User must explicitly opt in and provide their own API key.
  *
@@ -10,6 +10,7 @@
  * 3. Google Gemini (free tier) — https://aistudio.google.com/app/apikey
  *
  * All providers use OpenAI-compatible chat completions API format.
+ * AI can EXECUTE ACTIONS on the inventory via structured JSON commands.
  */
 LifeStock.register('GeminiAI', (function () {
   var PROVIDERS = {
@@ -62,6 +63,7 @@ LifeStock.register('GeminiAI', (function () {
   var provider = 'groq';
   var model = '';
   var chatHistory = [];
+  var lastActions = []; // Track executed actions for feedback
 
   function init() {
     try {
@@ -88,6 +90,7 @@ LifeStock.register('GeminiAI', (function () {
       return { id: k, name: p.name, keyUrl: p.keyUrl, models: p.models, vision: p.vision };
     });
   }
+  function getLastActions() { return lastActions; }
 
   function setProvider(p) {
     if (!PROVIDERS[p]) return false;
@@ -135,11 +138,14 @@ LifeStock.register('GeminiAI', (function () {
     var ctx = '=== ІНВЕНТАР І ЗАПАСИ ===\n';
     ctx += 'Всього товарів: ' + allProducts.length + '\n\n';
 
-    stock.forEach(function (item) {
-      ctx += '- ' + (item.name || 'Невідомо');
-      if (item.manufacturer) ctx += ' (' + item.manufacturer + ')';
-      ctx += ': ' + (item.stock || 0) + ' ' + (item.unit || 'шт');
-      if (item.price) ctx += ', ціна: ' + item.price + ' ₴';
+    allProducts.forEach(function (prod) {
+      var s = stock.find(function (st) { return st.productId === prod.id; });
+      ctx += '[ID:' + prod.id + '] ' + (prod.name || 'Невідомо');
+      if (prod.manufacturer) ctx += ' (' + prod.manufacturer + ')';
+      ctx += ': ' + (s ? s.stock : 0) + ' ' + (prod.unit || 'шт');
+      if (prod.price) ctx += ', ціна: ' + prod.price + ' грн';
+      if (prod.category) ctx += ', кат: ' + prod.category;
+      if (s && s.low) ctx += ' ⚠️ НИЗЬКИЙ ЗАПАС';
       ctx += '\n';
     });
 
@@ -171,6 +177,163 @@ LifeStock.register('GeminiAI', (function () {
   }
 
   /**
+   * System prompt with ACTION capabilities
+   */
+  function getActionSystemPrompt() {
+    return 'Ти асистент для управління запасами LifeStock. Відповідай українською, коротко і чітко.\n\n' +
+      'ТИ МОЖЕШ ВИКОНУВАТИ ДІЇ з інвентарем! Коли користувач просить щось змінити — додати, видалити, оновити — ' +
+      'встав команду у форматі JSON у окремому блоці коду ```json ... ```.\n\n' +
+      'ДОСТУПНІ КОМАНДИ:\n\n' +
+      '1. Додати товар:\n' +
+      '```json\n{"action":"add_product","name":"Кава Lavazza","category":"Напої","unit":"шт","price":120,"manufacturer":"Lavazza"}\n```\n\n' +
+      '2. Видалити товар (потрібен ID):\n' +
+      '```json\n{"action":"delete_product","productId":"123"}\n```\n\n' +
+      '3. Оновити ціну товару:\n' +
+      '```json\n{"action":"update_price","productId":"123","price":150}\n```\n\n' +
+      '4. Додати партію (termін придатності):\n' +
+      '```json\n{"action":"add_batch","productId":"123","batchNumber":"L-2026-001","expiryDate":"2026-12-31","remaining":10}\n```\n\n' +
+      '5. Оновити залишок партії:\n' +
+      '```json\n{"action":"update_batch_remaining","batchId":"456","remaining":5}\n```\n\n' +
+      '6. Встановити мінімальний запас:\n' +
+      '```json\n{"action":"set_min_stock","productId":"123","minStock":3}\n```\n\n' +
+      '7. Додати локацію зберігання:\n' +
+      '```json\n{"action":"add_storage","name":"Морозильник","type":"freezer","temperature":"-18"}\n```\n\n' +
+      '8. Додати рецепт:\n' +
+      '```json\n{"action":"add_recipe","name":"Омлет","ingredients":[{"name":"Яйце","qty":3},{"name":"Молоко","qty":100}],"steps":["Збий яйця","Додай молоко","Обсмаж"]}\n```\n\n' +
+      'ПРАВИЛА:\n' +
+      '- Завжди показуй ID товарів у контексті (ID:xxx), щоб користувач міг посилатися на них\n' +
+      '- Перед дією коротко підтвердь що збираєшся зробити\n' +
+      '- Після команди JSON додай коротке пояснення українською\n' +
+      '- Можна виконати кілька команд одразу — кожна в окремому блоці ```json\n' +
+      '- Якщо не знаєш ID — спитай користувача або знайди товар за назвою у контексті\n' +
+      '- НЕ вигадуй ID — використовуй тільки реальні з контексту інвентарю\n' +
+      '- Дати у форматі YYYY-MM-DD\n\n' +
+      'Поточні дані інвентарю:\n' + getInventoryContext();
+  }
+
+  /**
+   * Parse AI response for action JSON blocks and execute them
+   */
+  function executeActions(aiText) {
+    lastActions = [];
+    var actionBlocks = aiText.match(/```json\s*([\s\S]*?)```/g) || [];
+    if (actionBlocks.length === 0) return { executed: 0, results: [] };
+
+    var results = [];
+    actionBlocks.forEach(function (block) {
+      var jsonStr = block.replace(/```json\s*/, '').replace(/```/, '').trim();
+      try {
+        var cmd = JSON.parse(jsonStr);
+        var result = executeAction(cmd);
+        results.push(result);
+        lastActions.push(result);
+      } catch (e) {
+        results.push({ action: 'parse_error', success: false, message: 'Помилка парсингу: ' + e.message });
+      }
+    });
+
+    return { executed: results.length, results: results };
+  }
+
+  /**
+   * Execute a single action command
+   */
+  function executeAction(cmd) {
+    if (!cmd || !cmd.action) {
+      return { action: 'unknown', success: false, message: 'Невідома команда' };
+    }
+
+    var products = LifeStock.get('ProductCore');
+    var batchMgr = LifeStock.get('BatchManager');
+    var inv = LifeStock.get('InventoryEngine');
+    var storage = LifeStock.get('StorageManager');
+    var recipe = LifeStock.get('RecipeEngine');
+
+    switch (cmd.action) {
+      case 'add_product':
+        if (!products) return { action: cmd.action, success: false, message: 'Модуль ProductCore не завантажено' };
+        if (!cmd.name) return { action: cmd.action, success: false, message: 'Не вказано назву товару' };
+        var newProd = products.create({
+          name: cmd.name,
+          category: cmd.category || 'Інше',
+          unit: cmd.unit || 'шт',
+          price: cmd.price || 0,
+          manufacturer: cmd.manufacturer || '',
+        });
+        // If quantity specified, add a batch
+        if (cmd.quantity && cmd.quantity > 0 && batchMgr) {
+          batchMgr.createBatch(newProd.id, {
+            batchNumber: 'AI-' + Date.now(),
+            expiryDate: cmd.expiryDate || null,
+            remaining: cmd.quantity,
+          });
+        }
+        return { action: cmd.action, success: true, message: 'Товар "' + cmd.name + '" додано (ID: ' + newProd.id + ')', productId: newProd.id };
+
+      case 'delete_product':
+        if (!products) return { action: cmd.action, success: false, message: 'Модуль не завантажено' };
+        if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
+        var prod = products.get(cmd.productId);
+        if (!prod) return { action: cmd.action, success: false, message: 'Товар ID:' + cmd.productId + ' не знайдено' };
+        products.delete(cmd.productId);
+        return { action: cmd.action, success: true, message: 'Товар "' + (prod.name || cmd.productId) + '" видалено' };
+
+      case 'update_price':
+        if (!products) return { action: cmd.action, success: false, message: 'Модуль не завантажено' };
+        if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
+        var pProd = products.get(cmd.productId);
+        if (!pProd) return { action: cmd.action, success: false, message: 'Товар не знайдено' };
+        products.update(cmd.productId, { price: cmd.price });
+        return { action: cmd.action, success: true, message: 'Ціну "' + (pProd.name || '') + '" змінено на ' + cmd.price + ' грн' };
+
+      case 'add_batch':
+        if (!batchMgr) return { action: cmd.action, success: false, message: 'Модуль BatchManager не завантажено' };
+        if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
+        var bProd = products ? products.get(cmd.productId) : null;
+        if (!bProd) return { action: cmd.action, success: false, message: 'Товар ID:' + cmd.productId + ' не знайдено' };
+        var newBatch = batchMgr.createBatch(cmd.productId, {
+          batchNumber: cmd.batchNumber || 'AI-' + Date.now(),
+          expiryDate: cmd.expiryDate || null,
+          remaining: cmd.remaining || 0,
+        });
+        return { action: cmd.action, success: true, message: 'Партію додано до "' + bProd.name + '" (залишок: ' + (cmd.remaining || 0) + ', термін: ' + (cmd.expiryDate || '—') + ')' };
+
+      case 'update_batch_remaining':
+        if (!batchMgr) return { action: cmd.action, success: false, message: 'Модуль не завантажено' };
+        if (!cmd.batchId) return { action: cmd.action, success: false, message: 'Не вказано ID партії' };
+        batchMgr.updateRemaining(cmd.batchId, cmd.remaining);
+        return { action: cmd.action, success: true, message: 'Залишок партії ' + cmd.batchId + ' змінено на ' + cmd.remaining };
+
+      case 'set_min_stock':
+        if (!inv) return { action: cmd.action, success: false, message: 'Модуль Inventory не завантажено' };
+        if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
+        inv.setMinStock(cmd.productId, cmd.minStock);
+        return { action: cmd.action, success: true, message: 'Мін. запас встановлено: ' + cmd.minStock };
+
+      case 'add_storage':
+        if (!storage) return { action: cmd.action, success: false, message: 'Модуль Storage не завантажено' };
+        var newLoc = storage.createLocation({
+          name: cmd.name || 'Нова локація',
+          type: cmd.type || 'room',
+          temperature: cmd.temperature || '',
+        });
+        return { action: cmd.action, success: true, message: 'Локацію "' + (cmd.name || '') + '" додано' };
+
+      case 'add_recipe':
+        if (!recipe) return { action: cmd.action, success: false, message: 'Модуль Recipe не завантажено' };
+        var newRec = recipe.create({
+          name: cmd.name || 'Новий рецепт',
+          ingredients: cmd.ingredients || [],
+          steps: cmd.steps || [],
+        });
+        return { action: cmd.action, success: true, message: 'Рецепт "' + (cmd.name || '') + '" додано' };
+
+      default:
+        return { action: cmd.action || 'unknown', success: false, message: 'Невідома дія: ' + (cmd.action || '?') };
+    }
+  }
+
+  /**
    * Core API call — OpenAI-compatible chat completions
    */
   async function callAI(prompt, systemPrompt, imageBase64) {
@@ -182,12 +345,10 @@ LifeStock.register('GeminiAI', (function () {
     if (systemPrompt) {
       messages.push({ role: 'system', content: systemPrompt });
     }
-    // Add chat history (last 6 messages)
     chatHistory.slice(-6).forEach(function (msg) {
       messages.push(msg);
     });
 
-    // Build user message — text or multimodal
     if (imageBase64 && p.vision) {
       messages.push({
         role: 'user',
@@ -197,8 +358,7 @@ LifeStock.register('GeminiAI', (function () {
         ],
       });
     } else if (imageBase64 && !p.vision) {
-      // Provider doesn't support vision — send text only with note
-      messages.push({ role: 'user', content: prompt + '\n\n[Примітка: провайдер не підтримує аналіз зображень. Опис текстом.]' });
+      messages.push({ role: 'user', content: prompt + '\n\n[Примітка: провайдер не підтримує аналіз зображень.]' });
     } else {
       messages.push({ role: 'user', content: prompt });
     }
@@ -207,16 +367,15 @@ LifeStock.register('GeminiAI', (function () {
       model: model || p.defaultModel,
       messages: messages,
       temperature: 0.7,
-      max_tokens: 1024,
+      max_tokens: 2048,
     };
 
-    // Authorization header is required by all 3 providers
     var headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + apiKey,
     };
     if (provider === 'openrouter') {
-      headers['HTTP-Referer'] = 'https://ismi9.github.io/GreenPixelStudio/';
+      headers['HTTP-Referer'] = 'https://ismi9.github.io/lifestock-ai/';
       headers['X-Title'] = 'LifeStock AI';
     }
 
@@ -243,17 +402,19 @@ LifeStock.register('GeminiAI', (function () {
 
       var data = await response.json();
       var text = '';
-      // OpenAI-compatible response format
       if (data.choices && data.choices[0] && data.choices[0].message) {
         text = data.choices[0].message.content || '';
       }
 
-      // Save to history (text only, no images)
+      // Save to history
       chatHistory.push({ role: 'user', content: prompt });
       chatHistory.push({ role: 'assistant', content: text });
       if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
 
-      return { text: text, success: true };
+      // ===== EXECUTE ACTIONS from AI response =====
+      var actionResult = executeActions(text);
+
+      return { text: text, success: true, actions: actionResult };
     } catch (err) {
       console.error('[AI Core] API error:', err);
       return { error: 'Помилка з\'єднання: ' + (err.message || err) };
@@ -263,15 +424,14 @@ LifeStock.register('GeminiAI', (function () {
   // ===== AI FEATURES =====
 
   async function askQuestion(question) {
-    var ctx = getInventoryContext();
-    var systemMsg = 'Ти асистент для управління запасами LifeStock. Відповідай українською, коротко і чітко. Використовуй дані інвентарю:\n\n' + ctx;
+    var systemMsg = getActionSystemPrompt();
     return await callAI(question, systemMsg);
   }
 
   async function suggestRecipes() {
     var ctx = getInventoryContext();
     var prompt = 'У мене є такі продукти:\n' + ctx + '\n\nЗапропонуй 3 рецепти, які я можу приготувати. Для кожного: назва, інгредієнти, короткий опис. Відповідай українською.';
-    return await callAI(prompt);
+    return await callAI(prompt, getActionSystemPrompt());
   }
 
   async function analyzePhoto(imageBase64) {
@@ -282,19 +442,19 @@ LifeStock.register('GeminiAI', (function () {
   async function analyzeInventory() {
     var ctx = getInventoryContext();
     var prompt = 'Проаналізуй стан інвентарю:\n' + ctx + '\n\nДай рекомендації:\n1. Товари в надлишку\n2. Товари яких не вистачає\n3. Що скоро зіпсується\n4. Оптимальні пропозиції. Відповідай українською.';
-    return await callAI(prompt);
+    return await callAI(prompt, getActionSystemPrompt());
   }
 
   async function forecastPurchases() {
     var ctx = getInventoryContext();
     var prompt = 'На основі інвентарю:\n' + ctx + '\n\nСпрогнозуй:\n1. Що потрібно купити найближчим часом\n2. Орієнтовна кількість\n3. Пріоритет. Відповідай українською.';
-    return await callAI(prompt);
+    return await callAI(prompt, getActionSystemPrompt());
   }
 
   async function generateShoppingList() {
     var ctx = getInventoryContext();
     var prompt = 'Створи список покупок на основі інвентарю:\n' + ctx + '\n\nЗроби список:\n- Товари з критично низьким запасом\n- Товари що закінчуються\n- Орієнтовна вартість. Відповідай українською.';
-    return await callAI(prompt);
+    return await callAI(prompt, getActionSystemPrompt());
   }
 
   function clearHistory() { chatHistory = []; }
@@ -306,7 +466,8 @@ LifeStock.register('GeminiAI', (function () {
     isEnabled, hasKey, hasConsent,
     setApiKey, setConsent, setProvider, setModel,
     getProvider, getProviderInfo, getModel, getProviders,
-    callAI,
+    getLastActions,
+    callAI, executeActions,
     askQuestion, suggestRecipes, analyzePhoto,
     analyzeInventory, forecastPurchases, generateShoppingList,
     clearHistory, getHistory,

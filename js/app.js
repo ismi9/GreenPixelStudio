@@ -881,9 +881,20 @@ const App = (function () {
 
     ai.askQuestion(text).then(function (result) {
       aiChatMessages.pop();
-      if (result.error) aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
-      else if (result.text) aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
-      else aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь' });
+      if (result.error) {
+        aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
+      } else if (result.text) {
+        aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+        if (result.actions && result.actions.executed > 0) {
+          var actionSummary = result.actions.results.map(function(r) {
+            return (r.success ? '✅' : '❌') + ' ' + r.message;
+          }).join('\n');
+          aiChatMessages.push({ role: 'model', text: '<b>Виконано дії:</b>\n' + actionSummary });
+          refreshAll();
+        }
+      } else {
+        aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь' });
+      }
       renderAI();
     }).catch(function (err) {
       aiChatMessages.pop();
@@ -917,9 +928,20 @@ const App = (function () {
 
     promise.then(function (result) {
       aiChatMessages.pop();
-      if (result.error) aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
-      else if (result.text) aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
-      else aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь' });
+      if (result.error) {
+        aiChatMessages.push({ role: 'model', text: '❌ ' + escapeHtml(result.error) });
+      } else if (result.text) {
+        aiChatMessages.push({ role: 'model', text: formatAiText(result.text) });
+        if (result.actions && result.actions.executed > 0) {
+          var actionSummary = result.actions.results.map(function(r) {
+            return (r.success ? '✅' : '❌') + ' ' + r.message;
+          }).join('\n');
+          aiChatMessages.push({ role: 'model', text: '<b>Виконано дії:</b>\n' + actionSummary });
+          refreshAll();
+        }
+      } else {
+        aiChatMessages.push({ role: 'model', text: '❌ Порожня відповідь' });
+      }
       renderAI();
     }).catch(function (err) {
       aiChatMessages.pop();
