@@ -210,8 +210,11 @@ LifeStock.register('GeminiAI', (function () {
       max_tokens: 1024,
     };
 
-    // OpenRouter needs extra headers
-    var headers = { 'Content-Type': 'application/json' };
+    // Authorization header is required by all 3 providers
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey,
+    };
     if (provider === 'openrouter') {
       headers['HTTP-Referer'] = 'https://ismi9.github.io/GreenPixelStudio/';
       headers['X-Title'] = 'LifeStock AI';
