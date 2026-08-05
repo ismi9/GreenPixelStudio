@@ -145,7 +145,7 @@ LifeStock.register('GeminiAI', (function () {
       ctx += '[ID:' + prod.id + '] ' + (prod.name || 'Невідомо');
       if (prod.manufacturer) ctx += ' (' + prod.manufacturer + ')';
       ctx += ': ' + (s ? s.stock : 0) + ' ' + (prod.unit || 'шт');
-      if (prod.price) ctx += ', ціна: ' + prod.price + ' грн';
+      if (prod.price) { ctx += ', ціна: ' + prod.price + ' грн/' + (prod.priceUnit || prod.unit || 'шт'); }
       if (cat) ctx += ', кат: ' + cat.name;
       if (s && s.low) ctx += ' ⚠️ НИЗЬКИЙ ЗАПАС';
       ctx += '\n';
@@ -193,8 +193,8 @@ LifeStock.register('GeminiAI', (function () {
       'ТИ МОЖЕШ ВИКОНУВАТИ ДІЇ з інвентарем! Коли користувач просить щось змінити — додати, видалити, оновити — ' +
       'встав команду у форматі JSON у окремому блоці коду ```json ... ```.\n\n' +
       'ДОСТУПНІ КОМАНДИ (точні назви полів!):\n\n' +
-      '1. Додати товар (categoryName — назва категорії, буде створена якщо немає):\n' +
-      '```json\n{"action":"add_product","name":"Кава Lavazza","categoryName":"Напої","unit":"шт","price":120,"manufacturer":"Lavazza","minStock":2,"quantity":5,"expiryDate":"2026-12-31"}\n```\n' +
+      '1. Додати товар (categoryName — назва категорії; priceUnit — одиниця ціни: кг, г, л, мл, шт):\n' +
+      '```json\n{"action":"add_product","name":"Кава Lavazza","categoryName":"Напої","unit":"шт","price":120,"priceUnit":"шт","manufacturer":"Lavazza","minStock":2,"quantity":5,"expiryDate":"2026-12-31"}\n```\n' +
       '(quantity і expiryDate — опційно, одразу створює першу партію)\n\n' +
       '2. Видалити товар (потрібен реальний ID з контексту):\n' +
       '```json\n{"action":"delete_product","productId":"p-xxx"}\n```\n\n' +
@@ -326,6 +326,7 @@ LifeStock.register('GeminiAI', (function () {
           categoryId: categoryId,
           unit: cmd.unit || 'шт',
           price: cmd.price || 0,
+          priceUnit: cmd.priceUnit || '',
           minStock: cmd.minStock || 0,
           manufacturer: cmd.manufacturer || '',
         });
@@ -358,8 +359,8 @@ LifeStock.register('GeminiAI', (function () {
         if (!cmd.productId) return { action: cmd.action, success: false, message: 'Не вказано ID товару' };
         var pProd = products.get(cmd.productId);
         if (!pProd) return { action: cmd.action, success: false, message: 'Товар ID:' + cmd.productId + ' не знайдено' };
-        products.update(cmd.productId, { price: cmd.price });
-        return { action: cmd.action, success: true, message: 'Ціну "' + (pProd.name || '') + '" змінено на ' + cmd.price + ' грн' };
+        products.update(cmd.productId, { price: cmd.price, priceUnit: cmd.priceUnit || pProd.priceUnit || '' });
+        return { action: cmd.action, success: true, message: 'Ціну "' + (pProd.name || '') + '" змінено на ' + cmd.price + ' грн' + (cmd.priceUnit ? '/' + cmd.priceUnit : '') };
       }
 
       case 'add_batch': {

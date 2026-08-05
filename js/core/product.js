@@ -24,6 +24,7 @@ LifeStock.register('ProductCore', (function () {
       barcode: data.barcode || '',
       minStock: data.minStock || 0,
       price: data.price || 0,
+      priceUnit: data.priceUnit || '',
       icon: data.icon || '📦',
       manufacturer: data.manufacturer || '',
       brand: data.brand || '',
@@ -43,6 +44,7 @@ LifeStock.register('ProductCore', (function () {
   function update(id, patch) {
     const p = products.find(x => x.id === id);
     if (!p) return null;
+    if (patch.priceUnit !== undefined) p.priceUnit = patch.priceUnit;
     if (patch.manufacturer !== undefined) p.manufacturer = patch.manufacturer;
     if (patch.brand !== undefined) p.brand = patch.brand;
     if (patch.country !== undefined) p.country = patch.country;
@@ -85,11 +87,11 @@ LifeStock.register('ProductCore', (function () {
   function seed() {
     if (products.length > 0) return;
     const samples = [
-      { name: 'Молоко 3.2%', categoryId: 'cat-drink', unit: 'л', barcode: '48200', minStock: 3, price: 32.90, icon: '🥛' },
-      { name: 'Хліб білий', categoryId: 'cat-food', unit: 'шт', barcode: '48201', minStock: 2, price: 18.50, icon: '🍞' },
-      { name: 'Сир Гауда', categoryId: 'cat-food', unit: 'г', barcode: '48202', minStock: 200, price: 89.00, icon: '🧀' },
-      { name: 'Яйця курячі', categoryId: 'cat-food', unit: 'шт', barcode: '48203', minStock: 10, price: 42.00, icon: '🥚' },
-      { name: 'Кава мелена', categoryId: 'cat-drink', unit: 'г', barcode: '48205', minStock: 100, price: 145.00, icon: '☕' },
+      { name: 'Молоко 3.2%', categoryId: 'cat-drink', unit: 'л', barcode: '48200', minStock: 3, price: 32.90, priceUnit: 'л', icon: '🥛' },
+      { name: 'Хліб білий', categoryId: 'cat-food', unit: 'шт', barcode: '48201', minStock: 2, price: 18.50, priceUnit: 'шт', icon: '🍞' },
+      { name: 'Сир Гауда', categoryId: 'cat-food', unit: 'г', barcode: '48202', minStock: 200, price: 89.00, priceUnit: 'кг', icon: '🧀' },
+      { name: 'Яйця курячі', categoryId: 'cat-food', unit: 'шт', barcode: '48203', minStock: 10, price: 42.00, priceUnit: 'шт', icon: '🥚' },
+      { name: 'Кава мелена', categoryId: 'cat-drink', unit: 'г', barcode: '48205', minStock: 100, price: 145.00, priceUnit: 'кг', icon: '☕' },
     ];
     samples.forEach(s => add(s));
   }

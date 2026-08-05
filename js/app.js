@@ -72,7 +72,7 @@ const App = (function () {
       <div class="ls-stat"><span class="ls-stat-icon">📦</span><span class="ls-stat-val">${stats.totalProducts}</span><span class="ls-stat-lbl">Товарів</span></div>
       <div class="ls-stat ls-stat-warn"><span class="ls-stat-icon">📉</span><span class="ls-stat-val">${stats.lowStock}</span><span class="ls-stat-lbl">Низький залишок</span></div>
       <div class="ls-stat ls-stat-crit"><span class="ls-stat-icon">⏳</span><span class="ls-stat-val">${stats.expiringBatches}</span><span class="ls-stat-lbl">Термін ≤3 дн.</span></div>
-      <div class="ls-stat"><span class="ls-stat-icon">💰</span><span class="ls-stat-val">${stats.totalValue.toFixed(0)} ₴</span><span class="ls-stat-lbl">Вартість</span></div>
+      <div class="ls-stat"><span class="ls-stat-icon">💰</span><span class="ls-stat-val">${stats.totalValueDisplay || stats.totalValue.toFixed(2)} ₴</span><span class="ls-stat-lbl">Вартість</span></div>
     `;
   }
 
@@ -119,7 +119,7 @@ const App = (function () {
       </div>
       <div class="ls-table-wrap">
         <table class="ls-table">
-          <thead><tr><th></th><th>Товар</th><th>Категорія</th><th>Залишок</th><th>Мін.</th><th>Ціна</th><th>Статус</th><th></th></tr></thead>
+          <thead><tr><th></th><th>Товар</th><th>Категорія</th><th>Залишок</th><th>Мін.</th><th>Ціна</th><th>Вартість</th><th>Статус</th><th></th></tr></thead>
           <tbody id="invBody">
     `;
 
@@ -134,7 +134,8 @@ const App = (function () {
         <td>${cat.icon} ${cat.name}</td>
         <td><b>${item.stock}</b> ${item.unit}</td>
         <td>${item.minStock} ${item.unit}</td>
-        <td>${item.price.toFixed(2)} ₴</td>
+        <td>${item.priceDisplay || (item.price.toFixed(2) + ' ₴')}</td>
+        <td>${item.stockValueDisplay || (item.stockValue || 0).toFixed(2) + ' ₴'}</td>
         <td>${status}</td>
         <td><button class="ls-btn-icon" onclick="App.addBatch('${item.productId}')" title="Додати партію">📦</button></td>
       </tr>`;
@@ -171,7 +172,8 @@ const App = (function () {
         <td>${catObj.icon} ${catObj.name}</td>
         <td><b>${item.stock}</b> ${item.unit}</td>
         <td>${item.minStock} ${item.unit}</td>
-        <td>${item.price.toFixed(2)} ₴</td>
+        <td>${item.priceDisplay || (item.price.toFixed(2) + ' ₴')}</td>
+        <td>${item.stockValueDisplay || (item.stockValue || 0).toFixed(2) + ' ₴'}</td>
         <td>${status}</td>
         <td><button class="ls-btn-icon" onclick="App.addBatch('${item.productId}')" title="Додати партію">📦</button></td>
       </tr>`;
