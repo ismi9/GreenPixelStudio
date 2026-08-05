@@ -176,7 +176,7 @@ LifeStock.register('GeminiAI', (function () {
   async function callAI(prompt, systemPrompt, imageBase64) {
     if (!enabled || !apiKey) return { error: 'AI не активовано. Надайте API ключ та згоду.' };
     var p = PROVIDERS[provider];
-    if (!p) return { error: 'Невідомий провайдер: ' + provider; }
+    if (!p) return { error: 'Невідомий провайдер: ' + provider };
 
     var messages = [];
     if (systemPrompt) {
