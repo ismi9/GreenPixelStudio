@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дотична й Площа — візуальний курс математичного аналізу</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+:root {
+  --bg: #f4f1ea;
+  --ink: #1b2230;
+  --orange: #f05a28;
+  --green: #28a745;
+  --muted: #6b7280;
+  --grid: #d1cfc8;
+  --grid-bold: #c4c1b8;
+  --card: #faf8f3;
+  --border: #c8c5be;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--bg);
+  color: var(--ink);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+  min-height: 100vh;
+}
+/* Header */
+header {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 32px;
+  background: rgba(244,241,234,0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+header .logo { display: flex; align-items: center; gap: 10px; }
+header .logo svg { width: 28px; height: 28px; }
+header .logo-text { display: flex; flex-direction: column; }
+header .logo-text .title { font-family: 'Unbounded', sans-serif; font-weight: 700; font-size: 15px; }
+header .logo-text .sub { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--muted); }
+header nav { display: flex; gap: 20px; }
+header nav a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: var(--ink); text-decoration: none;
+  padding: 4px 0; border-bottom: 2px solid transparent; transition: border-color 0.2s;
+}
+header nav a:hover { border-bottom-color: var(--orange); }
+/* Hero */
+.hero {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+  padding: 48px 32px; max-width: 1400px; margin: 0 auto; align-items: center;
+}
+.hero-text .eyebrow {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 3px;
+  color: var(--muted); margin-bottom: 16px;
+}
+.hero-text h1 {
+  font-family: 'Source Serif 4', serif; font-weight: 700;
+  font-size: clamp(40px, 6vw, 72px); line-height: 1.05; margin-bottom: 20px;
+}
+.hero-text h1 .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+.hero-text h1 .dot.orange { background: var(--orange); }
+.hero-text h1 .dot.green { background: var(--green); }
+.hero-text p { font-size: 17px; line-height: 1.6; color: #374151; max-width: 480px; }
+.hero-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+.hero-nav a {
+  display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--ink); transition: all 0.2s;
+}
+.hero-nav a:hover { border-color: var(--orange); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.hero-nav a .num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+.hero-nav a .label { font-weight: 600; font-size: 15px; }
+/* Figure card */
+figure {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 20px; position: relative;
+}
+figure figcaption {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+}
+figure figcaption .left { color: var(--muted); }
+figure figcaption .center { color: var(--ink); font-weight: 500; }
+figure figcaption .right { color: var(--orange); }
+figure canvas { width: 100%; display: block; border-radius: 8px; }
+figure .controls {
+  display: flex; align-items: center; gap: 12px; margin-top: 12px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+}
+figure .controls button {
+  background: var(--ink); color: var(--bg); border: none; border-radius: 6px;
+  padding: 6px 10px; cursor: pointer; font-size: 12px;
+}
+figure .controls input[type=range] { flex: 1; accent-color: var(--orange); }
+figure .controls span { color: var(--muted); }
+/* Sections */
+section { padding: 48px 32px; max-width: 1400px; margin: 0 auto; }
+.section-header { margin-bottom: 32px; }
+.section-header .tag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--muted);
+}
+.section-header h2 {
+  font-family: 'Source Serif 4', serif; font-weight: 700; font-size: 36px; margin: 8px 0 12px;
+}
+.section-header p { font-size: 16px; line-height: 1.6; color: #374151; max-width: 600px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+}
+.stat-card .label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); }
+.stat-card .value { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; margin-top: 4px; }
+/* Buttons row */
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.btn-row button {
+  padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--card); font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  cursor: pointer; transition: all 0.15s; color: var(--ink);
+}
+.btn-row button:hover { border-color: var(--orange); }
+.btn-row button.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+/* Slider with label */
+.slider-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+.slider-row label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.slider-row input[type=range] { flex: 1; accent-color: var(--orange); }
+/* Practice articles */
+article {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; margin-bottom: 16px;
+}
+article .article-header { display: flex; gap: 16px; margin-bottom: 16px; }
+article .article-num {
+  font-family: 'IBM Plex Mono', monospace; font-size: 24px; font-weight: 600; color: var(--orange);
+}
+article .article-meta { flex: 1; }
+article .article-meta .cat { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); }
+article .article-meta h3 { font-size: 20px; font-weight: 600; margin: 4px 0; }
+article .article-body { font-size: 15px; line-height: 1.6; }
+article .article-controls { display: flex; gap: 8px; margin: 16px 0; }
+article .article-controls button {
+  padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); font-size: 12px; cursor: pointer; transition: all 0.15s;
+}
+article .article-controls button:hover { border-color: var(--orange); }
+article .answer-box { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+article .answer-box label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+article .answer-box input {
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 14px; font-family: 'IBM Plex Mono', monospace; width: 120px;
+}
+article .answer-box button {
+  padding: 8px 16px; border: none; border-radius: 8px;
+  background: var(--ink); color: var(--bg); font-size: 12px; cursor: pointer;
+}
+/* Footer */
+footer {
+  padding: 48px 32px; max-width: 1400px; margin: 0 auto;
+  border-top: 1px solid var(--border); margin-top: 48px;
+}
+footer .footer-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 32px; }
+footer h3 { font-family: 'Unbounded', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 12px; }
+footer p { font-size: 14px; line-height: 1.6; color: #4b5563; }
+footer nav { display: flex; flex-direction: column; gap: 8px; }
+footer nav a { color: var(--ink); text-decoration: none; font-size: 14px; }
+footer nav a:hover { color: var(--orange); }
+footer .footer-bottom { margin-top: 32px; text-align: center; }
+footer .formula { font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: var(--ink); }
+/* Tooltip dots */
+.dot-info { border-bottom: 1px dashed var(--muted); cursor: help; }
+/* KaTeX */
+.katex { font-size: 1.1em; }
+.math-block { margin: 8px 0; padding: 12px; background: rgba(0,0,0,0.03); border-radius: 8px; text-align: center; }
+/* Checkbox */
+checkbox-style { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+checkbox-style input { accent-color: var(--orange); }
+/* Responsive */
+@media (max-width: 900px) {
+  .hero, .two-col, .three-col { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="6" fill="#1b2230"/>
+      <line x1="6" y1="22" x2="22" y2="6" stroke="#f05a28" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="14" cy="14" r="2" fill="#28a745"/>
+    </svg>
+    <div class="logo-text">
+      <span class="title">Дотична й Площа</span>
+      <span class="sub">МАТАНАЛІЗ — НАЖИВО</span>
+    </div>
+  </div>
+  <nav>
+    <a href="#sec1">§1 Похідні</a>
+    <a href="#sec2">§2 Інтеграли</a>
+    <a href="#sec3">§3 Границі</a>
+    <a href="#sec4">§4 Практика</a>
+  </nav>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">— ІНТЕРАКТИВНИЙ АТЛАС МАТЕМАТИЧНОГО АНАЛІЗУ</p>
+    <h1>Нахил<span class="dot orange">.</span><br>Площа<span class="dot green">.</span><br>Границя.</h1>
+    <p>Три ідеї, намальовані наживо на міліметровому папері. Перетягуйте точку на кривій, рухайте повзунок суми Рімана, грайте в гру ε–δ — кожна фігура на цій сторінці — маленька лабораторія, яку можна взяти в руки.</p>
+    <div class="hero-nav">
+      <a href="#sec1"><span class="num">01</span><span class="label">Похідні</span></a>
+      <a href="#sec2"><span class="num">02</span><span class="label">Інтеграли</span></a>
+      <a href="#sec3"><span class="num">03</span><span class="label">Границі</span></a>
+      <a href="#sec4"><span class="num">04</span><span class="label">Практика</span></a>
+    </div>
+  </div>
+  <figure id="hero-figure">
+    <figcaption>
+      <span class="left">рис. 0</span>
+      <span class="center">дотична ковзає вздовж sin x</span>
+      <span class="right">перетягніть помаранчеву точку</span>
+    </figcaption>
+    <canvas id="hero-canvas" width="600" height="400"></canvas>
+    <div class="controls">
+      <button id="hero-play">⏸</button>
+      <label>швидкість</label>
+      <input type="range" id="hero-speed" min="0" max="2" step="0.1" value="0.9">
+      <span id="hero-speed-label">0,9×</span>
+      <span id="hero-x-label">x = 1,00</span>
+    </div>
+  </figure>
+</div>
+
+<!-- Section 1: Derivatives -->
+<section id="sec1">
+  <div class="section-header">
+    <span class="tag">§1 · РОЗДІЛ ПЕРШИЙ · МИТТЄВА ШВИДКІСТЬ ЗМІНИ</span>
+    <h2>Похідна.</h2>
+    <p>Наблизіться достатньо — і будь-яка гладка крива стає прямою. Похідна — це нахил тієї прямої: візьміться за точку на f і дивіться, як f′ відповідає в реальному часі, пліч-о-пліч.</p>
+  </div>
+  <div class="two-col">
+    <figure>
+      <figcaption><span class="left">f(x)</span><span class="center">sin x</span><span class="right">тягніть ● · колесо = масштаб</span></figcaption>
+      <canvas id="deriv-canvas1" width="500" height="350"></canvas>
+    </figure>
+    <figure>
+      <figcaption><span class="left">f′(x)</span><span class="center">нахил, відкладений як функція</span><span class="right">тягніть ● · колесо = масштаб</span></figcaption>
+      <canvas id="deriv-canvas2" width="500" height="350"></canvas>
+    </figure>
+  </div>
+  <div>
+    <div class="btn-row" id="deriv-funcs">
+      <button class="active" data-f="sin">SIN X</button>
+      <button data-f="poly">X³⁄3 − X</button>
+      <button data-f="gauss">E^(−X²/2)</button>
+      <button data-f="log">LN(1+X²)</button>
+    </div>
+    <div class="slider-row">
+      <label>КРОК СІЧНОЇ H — <span id="h-val">0,60</span></label>
+      <input type="range" id="h-slider" min="0.01" max="2" step="0.01" value="0.6">
+    </div>
+    <button id="secant-toggle" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;">СІЧНА: УВІМК</button>
+  </div>
+  <div style="margin-top:16px;">
+    <div class="math-block" id="math-defs"></div>
+    <p style="font-size:14px;color:#4b5563;line-height:1.6;">◈ наведіть на пунктирні терміни — з'явиться пояснення · похідна — це границя нахилів січних: ведіть h до нуля й дивіться, як зелений нахил опускається на помаранчевий.</p>
+  </div>
+  <div class="stats" id="deriv-stats">
+    <div class="stat-card"><div class="label">X</div><div class="value" id="stat-x">1,000</div></div>
+    <div class="stat-card"><div class="label">F(X)</div><div class="value" id="stat-fx">0,841</div></div>
+    <div class="stat-card"><div class="label">F′(X) — НАХИЛ ДОТИЧНОЇ</div><div class="value" id="stat-dfx">0,540</div></div>
+    <div class="stat-card"><div class="label">НАХИЛ СІЧНОЇ ΔF/H</div><div class="value" id="stat-secant">0,262</div></div>
+  </div>
+</section>
+
+<!-- Section 2: Integrals -->
+<section id="sec2">
+  <div class="section-header">
+    <span class="tag">§2 · РОЗДІЛ ДРУГИЙ · НАКОПИЧЕННА ПЛОЩА</span>
+    <h2>Інтеграл.</h2>
+    <p>Розріжте область на прямокутники, складіть їхні площі, подрібніть розбиття. Сума Рімана — ріштування; точна площа — споруда, якою воно стає при n → ∞.</p>
+  </div>
+  <figure>
+    <figcaption><span class="left">Σ</span><span class="center">sin x</span><span class="right">тягніть пропорції a / b на осі</span></figcaption>
+    <canvas id="riemann-canvas" width="1000" height="400"></canvas>
+    <div class="controls">
+      <span>зелене — над віссю, помаранчеве — під нею: інтеграл рахує <strong>орієнтовану</strong> площу</span>
+      <span><button id="riemann-zoom-in">+</button><button id="riemann-zoom-out">−</button></span>
+    </div>
+  </figure>
+  <div class="two-col">
+    <div>
+      <div class="slider-row">
+        <label>ПРЯМОКУТНИКИ N — <span id="n-val">24</span></label>
+        <input type="range" id="n-slider" min="1" max="200" step="1" value="24">
+      </div>
+      <div style="margin:12px 0;">
+        <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px;">ТОЧКА ЗЧИТУВАННЯ</p>
+        <div class="btn-row" id="riemann-sample">
+          <button data-s="left">ЗЛІВА</button>
+          <button class="active" data-s="mid">СЕРЕДИНА</button>
+          <button data-s="right">СПРАВА</button>
+          <button data-s="trap">ТРАПЕЦІЯ</button>
+        </div>
+      </div>
+      <div style="margin:12px 0;">
+        <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px;">ФУНКЦІЯ</p>
+        <div class="btn-row" id="riemann-func">
+          <button class="active" data-rf="sin">SIN X</button>
+          <button data-rf="parabola">X²⁄4</button>
+          <button data-rf="bell">4 − X²</button>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="show-exact" checked style="accent-color:var(--orange);"> показувати точну область фоном
+      </label>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px;">колесо = масштаб · тягнути = перемістити · подвійний клік = скидання</p>
+    </div>
+    <div class="stats">
+      <div class="stat-card"><div class="label">Sₙ — СУМА РІМАНА</div><div class="value" id="stat-riemann">1,7129</div></div>
+      <div class="stat-card"><div class="label">∫ᵇₐ F DX — ТОЧНО</div><div class="value" id="stat-exact">1,6536</div></div>
+      <div class="stat-card"><div class="label">ПОХИБКА |Sₙ − ∫|</div><div class="value" id="stat-error">0,0592</div></div>
+      <div class="stat-card"><div class="label">ΔX</div><div class="value" id="stat-dx">0,167</div></div>
+    </div>
+  </div>
+  <div class="math-block" id="integral-def"></div>
+</section>
+
+<!-- Section 3: Limits -->
+<section id="sec3">
+  <div class="section-header">
+    <span class="tag">§3 · РОЗДІЛ ТРЕТІЙ · ГРА В Ε–Δ</span>
+    <h2>Границя.</h2>
+    <p>Суперник призначає вам похибку ε; ви відповідаєте радіусом δ. Виіграйте гру для кожного можливого ε — і границя ваша. Тягніть помаранчеву смугу й дивіться, як δ стає на правильне місце.</p>
+  </div>
+  <figure>
+    <figcaption><span class="left">ε δ</span><span class="center">x² при a = 2</span><span class="right">тягніть за ε-ручки на правому краї</span></figcaption>
+    <div style="position:relative;">
+      <canvas id="limit-canvas" width="800" height="400"></canvas>
+    </div>
+    <div class="controls">
+      <span>ε = <span id="eps-val">1,100</span></span>
+      <span>δ = <span id="delta-val">0,258</span></span>
+      <span>δ — найбільший радіус, що втримує f у смузі</span>
+    </div>
+  </figure>
+  <div>
+    <div style="margin:12px 0;">
+      <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px;">ГРАНИЦЯ ПІД МІКРОСКОПОМ</p>
+      <div class="btn-row" id="limit-funcs">
+        <button class="active" data-lf="x2">X² ПРИ A = 2</button>
+        <button data-lf="sinc">SIN X⁄X ПРИ A = 0</button>
+        <button data-lf="removable">(X³−1)⁄(X−1) ПРИ A = 1</button>
+      </div>
+    </div>
+    <p style="font-size:14px;color:#4b5563;line-height:1.6;">крокуйте письмовим доказом — фігура підкоряється доказу, а не навпаки.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;margin-top:24px;">
+    <div class="stat-card">
+      <div class="label">ДОКАЗ</div>
+      <div class="value" style="font-size:16px;">X² → 4</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);margin-top:8px;">1 / 5</div>
+    </div>
+    <div class="stat-card" id="proof-step">
+      <div class="label">КРОК 1 · ТВЕРДЖЕННЯ</div>
+      <p style="font-size:14px;line-height:1.6;margin-top:8px;">Наскільки завгодно малим не був би бюджет похибки <span class="katex">ε</span> — ми мусимо вказати радіус <span class="katex">δ</span> так, щоб перебування в межах <span class="katex">δ</span> від <span class="katex">a=2</span> тримало <span class="katex">x²</span> в межах <span class="katex">ε</span> від <span class="katex">4</span>.</p>
+      <div class="math-block" id="proof-ineq"></div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;">… приховано ще 4 кроки — натисніть N</p>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+    <span style="font-size:12px;color:var(--muted);"><span>N</span>— далі · <span>←</span>— назад</span>
+    <button id="proof-next" style="padding:10px 24px;border:none;border-radius:8px;background:var(--ink);color:var(--bg);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;">НАСТУПНИЙ КРОК ▸</button>
+  </div>
+  <div style="margin-top:16px;">
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);">ТВЕРДЖЕННЯ</p>
+    <div class="math-block" id="limit-def"></div>
+    <p style="font-size:14px;color:#4b5563;line-height:1.6;">◈ спалах підтверджує: δ підходить — кожен x у зеленій смузі потрапляє в помаранчеву.</p>
+  </div>
+</section>
+
+<!-- Section 4: Practice -->
+<section id="sec4">
+  <div class="section-header">
+    <span class="tag">§4 · РОЗДІЛ ЧЕТВЕРТИЙ · ПРИКЛАДНІ ЗАДАЧІ</span>
+    <h2>Практика зі страхівкою.</h2>
+    <p>Задачі екзаменаційного типу з поступовими підказками та повністю розписаними розв'язками. Відповіді приймають десяткові та звичайні дроби — 0,3 і 3/10 однаково правильні.</p>
+  </div>
+  <article>
+    <div class="article-header">
+      <div class="article-num">01</div>
+      <div class="article-meta">
+        <div class="cat">ПОХІДНА · пов'язані швидкості</div>
+        <h3>Драбина ковзає</h3>
+      </div>
+    </div>
+    <div class="article-body">Драбина завдовжки 5 м спирається на стіну. Її основа ковзає від стіни зі швидкістю 0,4 м/с. Наскільки швидко верхівка ковзає <strong>вниз</strong> по стіні в мить, коли основа відійшла на 3 м?</div>
+    <div class="article-controls">
+      <button onclick="this.parentElement.querySelector('.hint1').style.display='block'">ПІДКАЗКА 1</button>
+      <button onclick="this.parentElement.querySelector('.hint2').style.display='block'">ПІДКАЗКА 2</button>
+      <button onclick="this.parentElement.querySelector('.solution').style.display='block'">РОЗВ'ЯЗОК</button>
+    </div>
+    <div class="hint1" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(0,0,0,0.03);border-radius:8px;">Використай теорему Піфагора: x² + y² = 25. Знайди y при x = 3.</div>
+    <div class="hint2" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(0,0,0,0.03);border-radius:8px;">Продиференціюй: 2x·dx/dt + 2y·dy/dt = 0. Підстав x=3, y=4, dx/dt=0.4.</div>
+    <div class="solution" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(40,167,69,0.08);border-radius:8px;">y = √(25−9) = 4 м. 2(3)(0.4) + 2(4)(dy/dt) = 0 → 2.4 + 8(dy/dt) = 0 → dy/dt = −0.3 м/с. Відповідь: 0,3 м/с вниз.</div>
+    <div class="answer-box">
+      <label>ВАША ВІДПОВІДЬ (М/С)</label>
+      <input type="text" placeholder="напр. 0.3" data-answer="0.3">
+      <button onclick="checkAnswer(this)">ПЕРЕВІРИТИ</button>
+    </div>
+  </article>
+  <article>
+    <div class="article-header">
+      <div class="article-num">02</div>
+      <div class="article-meta">
+        <div class="cat">ПОХІДНА · оптимізація</div>
+        <h3>Паркання вздовж річки</h3>
+      </div>
+    </div>
+    <div class="article-body">Є 40 м паркана для прямокутного загону вздовж прямої ділянки річки — з боку річки паркант не потрібен. Яку найбільшу площу можна огородити?</div>
+    <div class="article-controls">
+      <button onclick="this.parentElement.querySelector('.hint1').style.display='block'">ПІДКАЗКА 1</button>
+      <button onclick="this.parentElement.querySelector('.hint2').style.display='block'">ПІДКАЗКА 2</button>
+      <button onclick="this.parentElement.querySelector('.solution').style.display='block'">РОЗВ'ЯЗОК</button>
+    </div>
+    <div class="hint1" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(0,0,0,0.03);border-radius:8px;">Площа S = x·y, обмеження: 2x + y = 40 (три сторони).</div>
+    <div class="hint2" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(0,0,0,0.03);border-radius:8px;">Вирази y = 40 − 2x, тоді S = x(40−2x). Знайди максимум: dS/dx = 0.</div>
+    <div class="solution" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(40,167,69,0.08);border-radius:8px;">S = 40x − 2x², dS/dx = 40 − 4x = 0 → x = 10, y = 20. S = 200 м².</div>
+    <div class="answer-box">
+      <label>ВАША ВІДПОВІДЬ (М²)</label>
+      <input type="text" placeholder="напр. 200" data-answer="200">
+      <button onclick="checkAnswer(this)">ПЕРЕВІРИТИ</button>
+    </div>
+  </article>
+  <article>
+    <div class="article-header">
+      <div class="article-num">03</div>
+      <div class="article-meta">
+        <div class="cat">ІНТЕГРАЛ · означений інтеграл</div>
+        <h3>Площа під параболою</h3>
+      </div>
+    </div>
+    <div class="article-body">Обчисліть орієнтовану площу між <span class="katex">f(x) = 4 − x²</span> та віссю <span class="katex">x</span> від <span class="katex">x = 0</span> до <span class="katex">x = 2</span>. (Ця крива живе у §2 — поставте там <span class="katex">a=0</span>,<span class="katex">b=2</span> і спостерігайте, як <span class="katex">Sₙ</span> підбирається до вашої відповіді.)</div>
+    <div class="article-controls">
+      <button onclick="this.parentElement.querySelector('.hint1').style.display='block'">ПІДКАЗКА 1</button>
+      <button onclick="this.parentElement.querySelector('.hint2').style.display='block'">ПІДКАЗКА 2</button>
+      <button onclick="this.parentElement.querySelector('.solution').style.display='block'">РОЗВ'ЯЗОК</button>
+    </div>
+    <div class="hint1" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(0,0,0,0.03);border-radius:8px;">∫₀² (4−x²) dx = [4x − x³/3]₀²</div>
+    <div class="hint2" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(0,0,0,0.03);border-radius:8px;">Підстав межі: (8 − 8/3) − (0) = 16/3.</div>
+    <div class="solution" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(40,167,69,0.08);border-radius:8px;">∫₀² (4−x²)dx = [4x − x³/3]₀² = (8 − 8/3) − 0 = 16/3 ≈ 5,333 м².</div>
+    <div class="answer-box">
+      <label>ВАША ВІДПОВІДЬ</label>
+      <input type="text" placeholder="напр. 16/3" data-answer="16/3">
+      <button onclick="checkAnswer(this)">ПЕРЕВІРИТИ</button>
+    </div>
+  </article>
+  <article>
+    <div class="article-header">
+      <div class="article-num">04</div>
+      <div class="article-meta">
+        <div class="cat">ГРАНИЦЯ · границя ε–δ</div>
+        <h3>Дірка на початку координат</h3>
+      </div>
+    </div>
+    <div class="article-body">Обчисліть <span class="katex">lim(x→0) (√(x+4) − 2) / x</span> — а потім захистіть відповідь: чому невизначеність <span class="katex">0/0</span> не заважає границі існувати?</div>
+    <div class="article-controls">
+      <button onclick="this.parentElement.querySelector('.hint1').style.display='block'">ПІДКАЗКА 1</button>
+      <button onclick="this.parentElement.querySelector('.hint2').style.display='block'">ПІДКАЗКА 2</button>
+      <button onclick="this.parentElement.querySelector('.solution').style.display='block'">РОЗВ'ЯЗОК</button>
+    </div>
+    <div class="hint1" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(0,0,0,0.03);border-radius:8px;">Домнож на спряжений: (√(x+4)+2).</div>
+    <div class="hint2" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(0,0,0,0.03);border-radius:8px;">Чисельник: (x+4)−4 = x. Скороти x.</div>
+    <div class="solution" style="display:none;font-size:14px;color:#4b5563;margin:8px 0;padding:12px;background:rgba(40,167,69,0.08);border-radius:8px;">((√(x+4)−2)(√(x+4)+2)) / (x(√(x+4)+2)) = (x+4−4)/(x(√(x+4)+2)) = x/(x(√(x+4)+2)) = 1/(√(x+4)+2). При x→0: 1/(2+2) = 1/4.</div>
+    <div class="answer-box">
+      <label>ВАША ВІДПОВІДЬ</label>
+      <input type="text" placeholder="напр. 1/4" data-answer="1/4">
+      <button onclick="checkAnswer(this)">ПЕРЕВІРИТИ</button>
+    </div>
+  </article>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h3>Дотична й Площа</h3>
+      <p>Набрано шрифтами Unbounded, Source Serif 4 та IBM Plex Mono; формули верстає KaTeX. Жодних скріншотів і відео — кожна фігура обчислюється наживо у вашому браузері. Оновіть сторінку — і дотична ковзне знову.</p>
+    </div>
+    <nav>
+      <a href="#sec1">§1 — Похідні</a>
+      <a href="#sec2">§2 — Інтеграли</a>
+      <a href="#sec3">§3 — Границі</a>
+      <a href="#sec4">§4 — Практика</a>
+    </nav>
+  </div>
+  <div class="footer-bottom">
+    <p style="font-size:14px;color:#4b5563;">— візуальний курс математичного аналізу на міліметровому папері</p>
+    <p class="formula" style="margin-top:8px;">d/dx ∫₀ˣ f(t) dt = f(x) · теорема, що тримає все разом</p>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// Canvas helpers
+// ============================================================
+function setupCanvas(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx, w: rect.width, h: rect.height };
+}
+
+function drawGrid(ctx, w, h, step = 20) {
+  ctx.strokeStyle = '#d1cfc8';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x <= w; x += step) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+  }
+  for (let y = 0; y <= h; y += step) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+}
+
+function fmt(n, dec = 2) {
+  return n.toFixed(dec).replace('.', ',');
+}
+
+// ============================================================
+// Math functions
+// ============================================================
+const FUNCS = {
+  sin: { f: x => Math.sin(x), df: x => Math.cos(x), label: 'sin x' },
+  poly: { f: x => x*x*x/3 - x, df: x => x*x - 1, label: 'x³/3 − x' },
+  gauss: { f: x => Math.exp(-x*x/2), df: x => -x*Math.exp(-x*x/2), label: 'e^(−x²/2)' },
+  log: { f: x => Math.log(1+x*x), df: x => 2*x/(1+x*x), label: 'ln(1+x²)' },
+};
+
+const RIEMANN_FUNCS = {
+  sin: { f: x => Math.sin(x), integral: (a,b) => Math.cos(a) - Math.cos(b) },
+  parabola: { f: x => x*x/4, integral: (a,b) => (b**3 - a**3)/12 },
+  bell: { f: x => 4 - x*x, integral: (a,b) => 4*(b-a) - (b**3-a**3)/3 },
+};
+
+// ============================================================
+// Hero: tangent on sin(x) with animation
+// ============================================================
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const playBtn = document.getElementById('hero-play');
+  const speedSlider = document.getElementById('hero-speed');
+  const speedLabel = document.getElementById('hero-speed-label');
+  const xLabel = document.getElementById('hero-x-label');
+  let playing = true;
+  let x = 1.0;
+  let speed = 0.9;
+  let dragging = false;
+
+  function draw() {
+    const { ctx, w, h } = setupCanvas(canvas);
+    ctx.fillStyle = '#faf8f3';
+    ctx.fillRect(0, 0, w, h);
+    drawGrid(ctx, w, h);
+
+    const xMin = -1, xMax = 9, yMin = -2, yMax = 2;
+    const sx = x => ((x - xMin) / (xMax - xMin)) * w;
+    const sy = y => h - ((y - yMin) / (yMax - yMin)) * h;
+
+    // Axes
+    ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, sy(0)); ctx.lineTo(w, sy(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx(0), 0); ctx.lineTo(sx(0), h); ctx.stroke();
+
+    // sin(x)
+    ctx.strokeStyle = '#1b2230'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= w; i++) {
+      const xv = xMin + (i / w) * (xMax - xMin);
+      const yv = Math.sin(xv);
+      i === 0 ? ctx.moveTo(sx(xv), sy(yv)) : ctx.lineTo(sx(xv), sy(yv));
+    }
+    ctx.stroke();
+
+    // cos(x) = f'(x)
+    ctx.strokeStyle = 'rgba(240,90,40,0.3)'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i <= w; i++) {
+      const xv = xMin + (i / w) * (xMax - xMin);
+      const yv = Math.cos(xv);
+      i === 0 ? ctx.moveTo(sx(xv), sy(yv)) : ctx.lineTo(sx(xv), sy(yv));
+    }
+    ctx.stroke();
+
+    // Tangent line
+    const slope = Math.cos(x);
+    const y0 = Math.sin(x);
+    ctx.strokeStyle = '#f05a28'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    const x1 = x - 2, x2 = x + 2;
+    ctx.moveTo(sx(x1), sy(y0 + slope*(x1-x)));
+    ctx.lineTo(sx(x2), sy(y0 + slope*(x2-x)));
+    ctx.stroke();
+
+    // Point on curve
+    ctx.fillStyle = '#f05a28';
+    ctx.beginPath(); ctx.arc(sx(x), sy(y0), 6, 0, 2*Math.PI); ctx.fill();
+
+    // Slope label
+    ctx.fillStyle = '#f05a28';
+    ctx.font = '12px "IBM Plex Mono"';
+    ctx.fillText('нахил ' + fmt(slope), sx(x) + 10, sy(y0) - 10);
+
+    xLabel.textContent = 'x = ' + fmt(x);
+  }
+
+  function animate() {
+    if (playing && !dragging) {
+      x += 0.02 * speed;
+      if (x > 8) x = 0;
+    }
+    draw();
+    requestAnimationFrame(animate);
+  }
+
+  playBtn.onclick = () => { playing = !playing; playBtn.textContent = playing ? '⏸' : '▶'; };
+  speedSlider.oninput = () => { speed = +speedSlider.value; speedLabel.textContent = fmt(speed, 1) + '×'; };
+
+  canvas.addEventListener('mousedown', e => {
+    dragging = true;
+    const rect = canvas.getBoundingClientRect();
+    x = -1 + ((e.clientX - rect.left) / rect.width) * 10;
+    x = Math.max(0, Math.min(8, x));
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const rect = canvas.getBoundingClientRect();
+    x = -1 + ((e.clientX - rect.left) / rect.width) * 10;
+    x = Math.max(0, Math.min(8, x));
+  });
+  window.addEventListener('mouseup', () => dragging = false);
+
+  animate();
+})();
+
+// ============================================================
+// Section 1: Derivatives
+// ============================================================
+(function() {
+  const c1 = document.getElementById('deriv-canvas1');
+  const c2 = document.getElementById('deriv-canvas2');
+  const hSlider = document.getElementById('h-slider');
+  const hVal = document.getElementById('h-val');
+  const secantBtn = document.getElementById('secant-toggle');
+  const funcBtns = document.getElementById('deriv-funcs');
+  let curFunc = 'sin';
+  let px = 1.0;
+  let h = 0.6;
+  let showSecant = true;
+  let dragging = false;
+
+  function drawBoth() {
+    const fn = FUNCS[curFunc];
+    drawFunc(c1, fn, px, true);
+    drawFunc(c2, fn, px, false);
+
+    document.getElementById('stat-x').textContent = fmt(px, 3);
+    document.getElementById('stat-fx').textContent = fmt(fn.f(px), 3);
+    document.getElementById('stat-dfx').textContent = fmt(fn.df(px), 3);
+    const secantSlope = (fn.f(px+h) - fn.f(px)) / h;
+    document.getElementById('stat-secant').textContent = fmt(secantSlope, 3);
+  }
+
+  function drawFunc(canvas, fn, x, showTangent) {
+    const { ctx, w, h: ch } = setupCanvas(canvas);
+    ctx.fillStyle = '#faf8f3';
+    ctx.fillRect(0, 0, w, ch);
+    drawGrid(ctx, w, ch);
+
+    const xMin = -3, xMax = 6, yMin = -3, yMax = 3;
+    const sx = x => ((x - xMin) / (xMax - xMin)) * w;
+    const sy = y => ch - ((y - yMin) / (yMax - yMin)) * ch;
+
+    ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, sy(0)); ctx.lineTo(w, sy(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx(0), 0); ctx.lineTo(sx(0), ch); ctx.stroke();
+
+    // Function curve
+    const yFunc = showTangent ? fn.f : fn.df;
+    ctx.strokeStyle = showTangent ? '#1b2230' : '#f05a28';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= w; i++) {
+      const xv = xMin + (i / w) * (xMax - xMin);
+      const yv = yFunc(xv);
+      if (yv < yMin - 1 || yv > yMax + 1) continue;
+      i === 0 ? ctx.moveTo(sx(xv), sy(yv)) : ctx.lineTo(sx(xv), sy(yv));
+    }
+    ctx.stroke();
+
+    // Tangent
+    if (showTangent) {
+      const slope = fn.df(x);
+      const y0 = fn.f(x);
+      ctx.strokeStyle = '#f05a28'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(sx(x - 2), sy(y0 + slope * -2));
+      ctx.lineTo(sx(x + 2), sy(y0 + slope * 2));
+      ctx.stroke();
+
+      // Secant
+      if (showSecant) {
+        const sSlope = (fn.f(x + h) - fn.f(x)) / h;
+        ctx.strokeStyle = '#28a745'; ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 3]);
+        ctx.beginPath();
+        ctx.moveTo(sx(x - 1), sy(fn.f(x) + sSlope * -1));
+        ctx.lineTo(sx(x + h + 1), sy(fn.f(x) + sSlope * (h + 1)));
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // h point
+        ctx.fillStyle = '#28a745';
+        ctx.beginPath(); ctx.arc(sx(x + h), sy(fn.f(x + h)), 4, 0, 2*Math.PI); ctx.fill();
+      }
+
+      // Point
+      ctx.fillStyle = '#f05a28';
+      ctx.beginPath(); ctx.arc(sx(x), sy(y0), 6, 0, 2*Math.PI); ctx.fill();
+    } else {
+      // Derivative point
+      ctx.fillStyle = '#f05a28';
+      ctx.beginPath(); ctx.arc(sx(x), sy(fn.df(x)), 6, 0, 2*Math.PI); ctx.fill();
+    }
+
+    // Labels
+    ctx.fillStyle = '#6b7280'; ctx.font = '11px "IBM Plex Mono"';
+    ctx.fillText(showTangent ? 'f(x) = ' + fn.label : "f′(x)", 10, 20);
+  }
+
+  hSlider.oninput = () => { h = +hSlider.value; hVal.textContent = fmt(h); drawBoth(); };
+  secantBtn.onclick = () => {
+    showSecant = !showSecant;
+    secantBtn.textContent = showSecant ? 'СІЧНА: УВІМК' : 'СІЧНА: ВИМК';
+    drawBoth();
+  };
+  funcBtns.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      funcBtns.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      curFunc = btn.dataset.f;
+      drawBoth();
+    };
+  });
+
+  function handleDrag(canvas) {
+    canvas.addEventListener('mousedown', e => { dragging = true; updateX(e, canvas); });
+    canvas.addEventListener('mousemove', e => { if (dragging) updateX(e, canvas); });
+    window.addEventListener('mouseup', () => dragging = false);
+  }
+  function updateX(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    px = -3 + ((e.clientX - rect.left) / rect.width) * 9;
+    px = Math.max(-2.5, Math.min(5.5, px));
+    drawBoth();
+  }
+  handleDrag(c1); handleDrag(c2);
+
+  // Render math
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.getElementById('math-defs'), {
+        delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}],
+        throwOnError: false
+      });
+    }
+  });
+
+  drawBoth();
+})();
+
+// ============================================================
+// Section 2: Riemann sums
+// ============================================================
+(function() {
+  const canvas = document.getElementById('riemann-canvas');
+  const nSlider = document.getElementById('n-slider');
+  const nVal = document.getElementById('n-val');
+  const sampleBtns = document.getElementById('riemann-sample');
+  const funcBtns = document.getElementById('riemann-func');
+  const showExact = document.getElementById('show-exact');
+  let n = 24, sample = 'mid', curFunc = 'sin';
+  let a = 0, b = Math.PI;
+
+  function draw() {
+    const { ctx, w, h } = setupCanvas(canvas);
+    ctx.fillStyle = '#faf8f3'; ctx.fillRect(0, 0, w, h);
+    drawGrid(ctx, w, h);
+
+    const fn = RIEMANN_FUNCS[curFunc];
+    const xMin = -1, xMax = 7, yMin = -2.5, yMax = 4.5;
+    const sx = x => ((x - xMin) / (xMax - xMin)) * w;
+    const sy = y => h - ((y - yMin) / (yMax - yMin)) * h;
+
+    // Axes
+    ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, sy(0)); ctx.lineTo(w, sy(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx(0), 0); ctx.lineTo(sx(0), h); ctx.stroke();
+
+    // Exact area
+    if (showExact.checked) {
+      ctx.fillStyle = 'rgba(40,167,69,0.1)';
+      ctx.beginPath();
+      ctx.moveTo(sx(a), sy(0));
+      for (let x = a; x <= b; x += 0.01) {
+        ctx.lineTo(sx(x), sy(fn.f(x)));
+      }
+      ctx.lineTo(sx(b), sy(0));
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Rectangles
+    const dx = (b - a) / n;
+    let sum = 0;
+    for (let i = 0; i < n; i++) {
+      const xl = a + i * dx, xr = a + (i+1) * dx;
+      let yv;
+      if (sample === 'left') yv = fn.f(xl);
+      else if (sample === 'right') yv = fn.f(xr);
+      else if (sample === 'mid') yv = fn.f((xl + xr) / 2);
+      else if (sample === 'trap') yv = (fn.f(xl) + fn.f(xr)) / 2;
+
+      sum += sample === 'trap' ? (fn.f(xl) + fn.f(xr)) / 2 * dx : yv * dx;
+
+      const above = yv >= 0;
+      ctx.fillStyle = above ? 'rgba(40,167,69,0.35)' : 'rgba(240,90,40,0.35)';
+      ctx.fillRect(sx(xl), sy(Math.max(0, yv)), sx(xr) - sx(xl), Math.abs(sy(yv) - sy(0)));
+      ctx.strokeStyle = above ? '#28a745' : '#f05a28';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(sx(xl), sy(Math.max(0, yv)), sx(xr) - sx(xl), Math.abs(sy(yv) - sy(0)));
+    }
+
+    // Function curve
+    ctx.strokeStyle = '#1b2230'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= w; i++) {
+      const xv = xMin + (i / w) * (xMax - xMin);
+      const yv = fn.f(xv);
+      if (yv < yMin - 1 || yv > yMax + 1) continue;
+      i === 0 ? ctx.moveTo(sx(xv), sy(yv)) : ctx.lineTo(sx(xv), sy(yv));
+    }
+    ctx.stroke();
+
+    // a, b markers
+    ctx.fillStyle = '#1b2230';
+    ctx.font = '12px "IBM Plex Mono"';
+    ctx.fillText('a=' + fmt(a), sx(a) - 15, sy(0) + 16);
+    ctx.fillText('b=' + fmt(b, 1), sx(b) - 5, sy(0) + 16);
+
+    // Stats
+    const exact = fn.integral(a, b);
+    document.getElementById('stat-riemann').textContent = fmt(sum, 4);
+    document.getElementById('stat-exact').textContent = fmt(exact, 4);
+    document.getElementById('stat-error').textContent = fmt(Math.abs(sum - exact), 4);
+    document.getElementById('stat-dx').textContent = fmt(dx, 3);
+  }
+
+  nSlider.oninput = () => { n = +nSlider.value; nVal.textContent = n; draw(); };
+  sampleBtns.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      sampleBtns.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sample = btn.dataset.s;
+      draw();
+    };
+  });
+  funcBtns.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      funcBtns.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      curFunc = btn.dataset.rf;
+      if (curFunc === 'sin') { a = 0; b = Math.PI; }
+      else if (curFunc === 'parabola') { a = -2; b = 2; }
+      else { a = -2; b = 2; }
+      draw();
+    };
+  });
+  showExact.onchange = draw;
+
+  // Drag to change a/b
+  let draggingAB = null;
+  canvas.addEventListener('mousedown', e => {
+    const rect = canvas.getBoundingClientRect();
+    const cx = -1 + ((e.clientX - rect.left) / rect.width) * 8;
+    if (Math.abs(cx - a) < Math.abs(cx - b)) draggingAB = 'a';
+    else draggingAB = 'b';
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (!draggingAB) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = -1 + ((e.clientX - rect.left) / rect.width) * 8;
+    if (draggingAB === 'a') a = Math.min(cx, b - 0.1);
+    else b = Math.max(cx, a + 0.1);
+    draw();
+  });
+  window.addEventListener('mouseup', () => draggingAB = null);
+
+  // Zoom buttons
+  document.getElementById('riemann-zoom-in').onclick = () => { b = Math.min(b + 0.5, 6); draw(); };
+  document.getElementById('riemann-zoom-out').onclick = () => { b = Math.max(b - 0.5, a + 0.5); draw(); };
+
+  draw();
+})();
+
+// ============================================================
+// Section 3: ε-δ limit game
+// ============================================================
+(function() {
+  const canvas = document.getElementById('limit-canvas');
+  const funcBtns = document.getElementById('limit-funcs');
+  const epsVal = document.getElementById('eps-val');
+  const deltaVal = document.getElementById('delta-val');
+  const proofNext = document.getElementById('proof-next');
+  let eps = 1.1;
+  let curFunc = 'x2';
+  let draggingEps = false;
+  let proofStep = 1;
+
+  const LIM_FUNCS = {
+    x2: { f: x => x*x, a: 2, L: 4, label: 'x² → 4' },
+    sinc: { f: x => x === 0 ? 1 : Math.sin(x)/x, a: 0, L: 1, label: 'sin(x)/x → 1' },
+    removable: { f: x => x === 1 ? 3 : (x**3-1)/(x-1), a: 1, L: 3, label: '(x³−1)/(x−1) → 3' },
+  };
+
+  function computeDelta() {
+    const fn = LIM_FUNCS[curFunc];
+    // Binary search for max delta
+    let lo = 0, hi = 5;
+    for (let i = 0; i < 100; i++) {
+      const mid = (lo + hi) / 2;
+      let ok = true;
+      for (let dx = -mid; dx <= mid; dx += mid / 50) {
+        if (Math.abs(dx) < 1e-10) continue;
+        const x = fn.a + dx;
+        if (Math.abs(fn.f(x) - fn.L) > eps) { ok = false; break; }
+      }
+      if (ok) lo = mid; else hi = mid;
+    }
+    return lo;
+  }
+
+  function draw() {
+    const { ctx, w, h } = setupCanvas(canvas);
+    ctx.fillStyle = '#faf8f3'; ctx.fillRect(0, 0, w, h);
+    drawGrid(ctx, w, h);
+
+    const fn = LIM_FUNCS[curFunc];
+    const xMin = fn.a - 3, xMax = fn.a + 3;
+    const yMin = fn.L - 3, yMax = fn.L + 3;
+    const sx = x => ((x - xMin) / (xMax - xMin)) * w;
+    const sy = y => h - ((y - yMin) / (yMax - yMin)) * h;
+
+    // Axes
+    ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, sy(0)); ctx.lineTo(w, sy(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx(0), 0); ctx.lineTo(sx(0), h); ctx.stroke();
+
+    // δ band (green)
+    const delta = computeDelta();
+    ctx.fillStyle = 'rgba(40,167,69,0.12)';
+    ctx.fillRect(sx(fn.a - delta), 0, sx(fn.a + delta) - sx(fn.a - delta), h);
+
+    // ε band (orange)
+    ctx.fillStyle = 'rgba(240,90,40,0.12)';
+    ctx.fillRect(0, sy(fn.L + eps), w, sy(fn.L - eps) - sy(fn.L + eps));
+
+    // Function
+    ctx.strokeStyle = '#1b2230'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= w; i++) {
+      const xv = xMin + (i / w) * (xMax - xMin);
+      const yv = fn.f(xv);
+      if (yv < yMin - 1 || yv > yMax + 1) continue;
+      if (i === 0) ctx.moveTo(sx(xv), sy(yv)); else ctx.lineTo(sx(xv), sy(yv));
+    }
+    ctx.stroke();
+
+    // Hole point
+    ctx.fillStyle = '#faf8f3'; ctx.strokeStyle = '#1b2230'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(sx(fn.a), sy(fn.L), 5, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+
+    // ε handles
+    ctx.fillStyle = '#f05a28';
+    ctx.beginPath(); ctx.arc(w - 20, sy(fn.L + eps), 6, 0, 2*Math.PI); ctx.fill();
+    ctx.beginPath(); ctx.arc(w - 20, sy(fn.L - eps), 6, 0, 2*Math.PI); ctx.fill();
+
+    // Labels
+    ctx.fillStyle = '#6b7280'; ctx.font = '11px "IBM Plex Mono"';
+    ctx.fillText(fn.label, 10, 20);
+    epsVal.textContent = fmt(eps, 3);
+    deltaVal.textContent = fmt(delta, 3);
+  }
+
+  funcBtns.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      funcBtns.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      curFunc = btn.dataset.lf;
+      draw();
+    };
+  });
+
+  // Drag ε handles
+  canvas.addEventListener('mousedown', e => {
+    const rect = canvas.getBoundingClientRect();
+    const cy = -3 + ((e.clientY - rect.top) / rect.height) * 6;
+    if (Math.abs(cy - (4 + eps)) < 0.5 || Math.abs(cy - (4 - eps)) < 0.5) {
+      draggingEps = true;
+    }
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (!draggingEps) return;
+    const rect = canvas.getBoundingClientRect();
+    const cy = -3 + ((e.clientY - rect.top) / rect.height) * 6;
+    eps = Math.max(0.05, Math.abs(cy - 4));
+    draw();
+  });
+  window.addEventListener('mouseup', () => draggingEps = false);
+
+  // Proof steps
+  const steps = [
+    { title: 'КРОК 1 · ТВЕРДЖЕННЯ', text: 'Наскільки завгодно малим не був би бюджет похибки ε — ми мусимо вказати радіус δ так, щоб перебування в межах δ від a=2 тримало x² в межах ε від 4.' },
+    { title: 'КРОК 2 · ОЦІНКА', text: '|x² − 4| = |x−2|·|x+2|. При |x−2| < δ маємо |x+2| < 4+δ. Отже |x²−4| < δ(4+δ).' },
+    { title: 'КРОК 3 · ВИБІР δ', text: 'Хочемо δ(4+δ) ≤ ε. Достатньо взяти δ = min(1, ε/5). При δ ≤ 1: δ(4+δ) ≤ 5δ ≤ ε.' },
+    { title: 'КРОК 4 · ПЕРЕВІРКА', text: 'Якщо |x−2| < δ ≤ ε/5, то |x²−4| = |x−2|·|x+2| < (ε/5)·5 = ε. ✓' },
+    { title: 'КРОК 5 · ВИСНОВОК', text: 'Для любого ε > 0 знайдено δ = min(1, ε/5) таке, що |x−2| < Δ ⟹ |x²−4| < ε. Границя доведена. ∎' },
+  ];
+
+  proofNext.onclick = () => {
+    proofStep = proofStep >= steps.length ? 1 : proofStep + 1;
+    const s = steps[proofStep - 1];
+    const card = document.getElementById('proof-step');
+    card.querySelector('.label').textContent = s.title;
+    card.querySelector('p').textContent = s.text;
+    card.querySelector('.math-block').innerHTML = proofStep >= 2 ? '$$0 < |x-2| < \\delta \\Rightarrow |x^2-4| < \\varepsilon$$' : '';
+    if (window.renderMathInElement) renderMathInElement(card, { delimiters: [{left: '$$', right: '$$', display: true}], throwOnError: false });
+    proofNext.textContent = proofStep >= steps.length ? 'ПОЧАТИ ЗАНОВО ▸' : 'НАСТУПНИЙ КРОК ▸';
+  };
+
+  draw();
+})();
+
+// ============================================================
+// Answer checker
+// ============================================================
+function checkAnswer(btn) {
+  const input = btn.parentElement.querySelector('input');
+  const expected = input.dataset.answer;
+  const val = input.value.trim().replace(',', '.');
+  const numVal = parseFloat(val);
+  const numExp = parseFloat(expected);
+  const isCorrect = !isNaN(numVal) && !isNaN(numExp) && Math.abs(numVal - numExp) < 0.01;
+  input.style.borderColor = isCorrect ? '#28a745' : '#f05a28';
+  input.style.background = isCorrect ? 'rgba(40,167,69,0.08)' : 'rgba(240,90,40,0.08)';
+}
+
+// ============================================================
+// KaTeX rendering
+// ============================================================
+window.addEventListener('load', () => {
+  if (window.renderMathInElement) {
+    const opts = {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      throwOnError: false
+    };
+    renderMathInElement(document.body, opts);
+
+    // Specific math blocks
+    const mathDefs = document.getElementById('math-defs');
+    if (mathDefs) mathDefs.innerHTML = '$$f\'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$';
+
+    const intDef = document.getElementById('integral-def');
+    if (intDef) intDef.innerHTML = '$$\\int_a^b f(x)\\,dx = \\lim_{n \\to \\infty} \\sum_{i=1}^n f(x_i)\\,\\Delta x$$';
+
+    const proofIneq = document.getElementById('proof-ineq');
+    if (proofIneq) proofIneq.innerHTML = '$$0 < |x-2| < \\delta \\Rightarrow |x^2-4| < \\varepsilon$$';
+
+    const limitDef = document.getElementById('limit-def');
+    if (limitDef) limitDef.innerHTML = '$$\\lim_{x \\to a} f(x) = L \\iff \\forall\\varepsilon>0\\,\\exists\\delta>0: 0<|x-a|<\\delta \\Rightarrow |f(x)-L|<\\varepsilon$$';
+
+    renderMathInElement(document.body, opts);
+  }
+});
+</script>
+</body>
+</html>
